@@ -1,5 +1,6 @@
 import codecs
-from setuptools import setup, find_packages
+from setuptools import setup
+from setuptools import find_packages
 
 entry_points = {
     'console_scripts': [
@@ -24,7 +25,7 @@ setup(
     version=_read('version.txt').strip(),
     author='Jason Madden',
     author_email='jason@nextthought.com',
-    description="NTI Base",
+    description="NTI Products Webinar",
     long_description=(
         _read('README.rst') 
         + '\n\n' 
@@ -49,12 +50,14 @@ setup(
     packages=find_packages('src'),
     package_dir={'': 'src'},
     include_package_data=True,
-    namespace_packages=['nti'],
+    namespace_packages=['nti', 'nti.app', 'nti.app.products'],
     tests_require=TESTS_REQUIRE,
     install_requires=[
         'setuptools',
+        'pyramid',
         'six',
         'zope.component',
+        'zope.i18nmessageid',
         'zope.interface',
         'zope.schema',
         'zope.security',
