@@ -5,6 +5,9 @@ from setuptools import find_packages
 entry_points = {
     'console_scripts': [
     ],
+    "z3c.autoinclude.plugin": [
+        'target = nti.app',
+    ],
 }
 
 TESTS_REQUIRE = [
@@ -27,8 +30,8 @@ setup(
     author_email='jason@nextthought.com',
     description="NTI Products Webinar",
     long_description=(
-        _read('README.rst') 
-        + '\n\n' 
+        _read('README.rst')
+        + '\n\n'
         + _read("CHANGES.rst")
     ),
     license='Apache',
@@ -56,6 +59,7 @@ setup(
         'setuptools',
         'pyramid',
         'six',
+        'nti.app.products.integration',
         'zope.component',
         'zope.i18nmessageid',
         'zope.interface',
