@@ -19,6 +19,8 @@ from nti.app.products.integration.integration import AbstractOAuthAuthorizedInte
 from nti.app.products.webinar.interfaces import IWebinarIntegration
 from nti.app.products.webinar.interfaces import IWebinarAuthorizedIntegration
 
+from nti.dublincore.time_mixins import PersistentCreatedAndModifiedTimeObject
+
 from nti.externalization.representation import WithRepr
 
 from nti.schema.fieldproperty import createDirectFieldProperties
@@ -35,15 +37,20 @@ class GoToWebinarIntegration(AbstractIntegration,
 
     createDirectFieldProperties(IWebinarIntegration)
 
+    __name__ = 'webinar'
+
     mimeType = mime_type = "application/vnd.nextthought.integration.gotowebinarintegration"
 
 
 @WithRepr
 @interface.implementer(IWebinarAuthorizedIntegration)
 class GoToWebinarAuthorizedIntegration(AbstractOAuthAuthorizedIntegration,
+                                       PersistentCreatedAndModifiedTimeObject,
                                        SchemaConfigured):
 
     createDirectFieldProperties(IWebinarAuthorizedIntegration)
+
+    __name__ = 'webinar'
 
     mimeType = mime_type = "application/vnd.nextthought.integration.gotowebinarauthorizedintegration"
 
