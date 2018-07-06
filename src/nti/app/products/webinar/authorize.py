@@ -8,6 +8,7 @@ from __future__ import absolute_import
 from six.moves import urllib_parse
 
 import os
+import base64
 import hashlib
 import requests
 
@@ -154,7 +155,6 @@ class WebinarAuth2(AbstractAuthenticatedView):
                         provided=IWebinarAuthorizedIntegration)
 
     def __call__(self):
-        from IPython.terminal.debugger import set_trace;set_trace()
         request = self.request
         params = request.params
         auth_keys = component.getUtility(IOAuthKeys, name="webinar")
@@ -192,7 +192,8 @@ class WebinarAuth2(AbstractAuthenticatedView):
                     'grant_type': 'authorization_code',
                     'redirect_uri': redirect_webinar_oauth2_uri(request)}
             auth_header = '%s:%s' % (auth_keys.APIKey, auth_keys.secretKey)
-            auth_header = 'Basic %s' % auth_header.encode('base64')
+            auth_header = base64.b64encode(auth_header)
+            auth_header = 'Basic %s' % auth_header
             response = requests.post(WEBINAR_AUTH_TOKEN_URL,
                                      data,
                                      headers={'Authorization': auth_header})
@@ -203,12 +204,12 @@ class WebinarAuth2(AbstractAuthenticatedView):
                              'code': 'WebinarAuthError'})
 
             access_data = response.json()
-            if 'access_token' not in data:
+            if 'access_token' not in access_data:
                 logger.warn('Missing webinar access token (%s)',
                             access_data)
                 raise_error({'message': _(u"No webinar access token"),
                              'code': 'WebinarAuthMissingAccessToken'})
-            if 'refresh_token' not in data:
+            if 'refresh_token' not in access_data:
                 logger.warn('Missing webinar refresh token (%s)',
                             access_data)
                 raise_error({'message': _(u"No webinar refresh token"),
@@ -220,4 +221,5 @@ class WebinarAuth2(AbstractAuthenticatedView):
             logger.exception('Failed to authorize with webinar')
             raise_error({'message': _(u"Error during webinar authorization."),
                         'code': 'WebinarAuthError'})
+        # FIXME: need to return user to some app url
         return response
