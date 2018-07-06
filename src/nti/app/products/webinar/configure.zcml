@@ -30,8 +30,11 @@
 
     <!-- Webinar auth -->
     <include package="nti.common" file="meta.zcml" />
-    <oauth:registerOAuthKeys
-            apiKey="FwjZl3gCGZxypCN1TsmkbdGhQc5OoTXf"
-            secretKey="LhehRClH6iEJQk35"
-            id="webinar" />
+
+    <configure zcml:condition="have devmode">
+        <oauth:registerOAuthKeys
+                apiKey="FwjZl3gCGZxypCN1TsmkbdGhQc5OoTXf"
+                secretKey="LhehRClH6iEJQk35"
+                id="webinar" />
+    </configure>
 </configure>
