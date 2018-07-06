@@ -5,12 +5,12 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import absolute_import
 
-from six.moves import urllib_parse
-
 import os
 import base64
 import hashlib
 import requests
+
+from six.moves import urllib_parse
 
 from zope import component
 
@@ -49,6 +49,20 @@ WEBINAR_AUTH_TOKEN_URL = 'https://api.getgo.com/oauth/v2/token'
 
 def raise_error(data, tb=None, factory=hexc.HTTPBadRequest, request=None):
     request = request or get_current_request()
+    failure_redirect = request.session.get('webinar.failure')
+    if failure_redirect:
+        error_message = data.get('message')
+        if error_message:
+            parsed = urllib_parse.urlparse(failure_redirect)
+            parsed = list(parsed)
+            query = parsed[4]
+            if query:
+                query = query + '&error=' + urllib_parse.quote(error_message)
+            else:
+                query = 'error=' + urllib_parse.quote(error_message)
+            parsed[4] = query
+            failure_redirect = urllib_parse.urlunparse(parsed)
+        raise hexc.HTTPSeeOther(location=failure_redirect)
     raise_json_error(request, factory, data, tb)
 
 
@@ -221,5 +235,7 @@ class WebinarAuth2(AbstractAuthenticatedView):
             logger.exception('Failed to authorize with webinar')
             raise_error({'message': _(u"Error during webinar authorization."),
                         'code': 'WebinarAuthError'})
-        # FIXME: need to return user to some app url
+
+        target = request.session.get('webinar.success')
+        response = hexc.HTTPSeeOther(location=target)
         return response
