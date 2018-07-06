@@ -21,7 +21,8 @@ class IWebinarIntegration(IIntegration):
     """
 
 
-class IWebinarAuthorizedIntegration(IOAuthAuthorizedIntegration):
+class IWebinarAuthorizedIntegration(IOAuthAuthorizedIntegration,
+                                    IWebinarIntegration):
     """
     An :class:`IOAuthAuthorizedIntegration` for webinars.
     """

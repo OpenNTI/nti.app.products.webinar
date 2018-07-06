@@ -26,6 +26,7 @@ from nti.app.externalization.error import raise_json_error
 
 from nti.app.products.webinar import REL_AUTH_WEBINAR
 
+from nti.app.products.webinar.interfaces import IWebinarIntegration
 from nti.app.products.webinar.interfaces import IWebinarAuthorizedIntegration
 
 from nti.app.products.webinar.integration import GoToWebinarAuthorizedIntegration
@@ -36,7 +37,9 @@ from nti.common.interfaces import IOAuthKeys
 
 from nti.dataserver.authorization import is_admin_or_site_admin
 
-from nti.dataserver.interfaces import IDataserverFolder
+from nti.links.externalization import render_link
+
+from nti.links.links import Link
 
 from nti.site.utils import registerUtility
 
@@ -67,12 +70,11 @@ def raise_error(data, tb=None, factory=hexc.HTTPBadRequest, request=None):
 
 
 def redirect_webinar_oauth2_uri(request):
-    root = request.route_path('objects.generic.traversal', traverse=())
-    root = root[:-1] if root.endswith('/') else root
-    target = urllib_parse.urljoin(request.application_url, root)
-    target = target + '/' if not target.endswith('/') else target
-    target = urllib_parse.urljoin(target, AUTH_WEBINAR_OAUTH2)
-    return target
+    link = Link(request.context, elements=(AUTH_WEBINAR_OAUTH2,))
+    link = render_link(link)
+    link_href = link.get('href')
+    result = urllib_parse.urljoin(request.host_url, link_href)
+    return result
 
 
 def redirect_webinar_oauth2_params(request, state=None, auth_keys=None):
@@ -87,7 +89,7 @@ def redirect_webinar_oauth2_params(request, state=None, auth_keys=None):
 
 
 @view_config(route_name='objects.generic.traversal',
-             context=IDataserverFolder,
+             context=IWebinarIntegration,
              renderer='rest',
              request_method='GET',
              name=REL_AUTH_WEBINAR)
@@ -125,7 +127,7 @@ class WebinarAuth(AbstractAuthenticatedView):
 
 
 @view_config(route_name='objects.generic.traversal',
-             context=IDataserverFolder,
+             context=IWebinarIntegration,
              renderer='rest',
              request_method='GET',
              name=AUTH_WEBINAR_OAUTH2)
@@ -158,9 +160,6 @@ class WebinarAuth2(AbstractAuthenticatedView):
     """
 
     def _create_auth_integration(self, access_data):
-        access_token = access_data.get('access_token')
-        access_header = 'Bearer %s' % access_token
-        self.request.response.headers['Authorization'] = access_header
         refresh_token = access_data.get('refresh_token')
         auth_integration = GoToWebinarAuthorizedIntegration(title='Authorized GOTOWebinar Integration',
                                                             refresh_token=refresh_token)

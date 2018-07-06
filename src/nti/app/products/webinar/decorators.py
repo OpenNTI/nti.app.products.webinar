@@ -23,14 +23,10 @@ from nti.app.renderers.decorators import AbstractAuthenticatedRequestAwareDecora
 
 from nti.dataserver.authorization import is_admin_or_site_admin
 
-from nti.dataserver.interfaces import IDataserverFolder
-
 from nti.externalization.interfaces import StandardExternalFields
 from nti.externalization.interfaces import IExternalMappingDecorator
 
 from nti.links.links import Link
-
-from nti.traversal.traversal import find_interface
 
 LINKS = StandardExternalFields.LINKS
 
@@ -46,9 +42,8 @@ class _WebinarIntegrationDecorator(AbstractAuthenticatedRequestAwareDecorator):
            and is_admin_or_site_admin(self.remoteUser)
 
     def _do_decorate_external(self, context, result):
-        ds2 = find_interface(context, IDataserverFolder)
         links = result.setdefault(LINKS, [])
-        link = Link(ds2,
+        link = Link(context,
                     rel=REL_AUTH_WEBINAR,
                     elements=('@@%s' % REL_AUTH_WEBINAR,))
         interface.alsoProvides(link, ILocation)
