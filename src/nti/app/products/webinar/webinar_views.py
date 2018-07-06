@@ -16,7 +16,7 @@ from zope import component
 
 from nti.app.products.webinar.interfaces import IWebinarAuthorizedIntegration
 
-from nti.appserver.ugd_edit_views import UGDDeleteView
+from nti.app.base.abstract_views import AbstractAuthenticatedView
 
 from nti.dataserver.authorization import ACT_CONTENT_EDIT
 
@@ -30,7 +30,7 @@ logger = __import__('logging').getLogger(__name__)
              request_method='DELETE',
              permission=ACT_CONTENT_EDIT,
              renderer='rest')
-class WebinarIntegrationDeleteView(UGDDeleteView):
+class WebinarIntegrationDeleteView(AbstractAuthenticatedView):
     """
     Allow deleting (unauthorizing) a :class:`IWebinarAuthorizedIntegration`.
     """
