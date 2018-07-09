@@ -6,4 +6,7 @@
 
 	<include package="pyramid_zcml" />
 
+    <pyramid:scan package='.authorize' />
+    <pyramid:scan package='.webinar_views' />
+
 </configure>
