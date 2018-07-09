@@ -15,6 +15,11 @@ from zope import interface
 from nti.app.products.integration.interfaces import IIntegration
 from nti.app.products.integration.interfaces import IOAuthAuthorizedIntegration
 
+from nti.schema.field import Bool
+from nti.schema.field import Number
+from nti.schema.field import Object
+from nti.schema.field import ListOrTuple
+from nti.schema.field import ValidDatetime
 from nti.schema.field import DecodingValidTextLine as ValidTextLine
 
 
@@ -78,3 +83,55 @@ class IWebinarClient(interface.Interface):
         """
         Get the registration fields for the given :class:`IWebinar`.
         """
+
+
+class IWebinarSession(interface.Interface):
+
+    startTime = ValidDatetime(title=u"Webinar session start date",
+                              required=True)
+
+    endTime = ValidDatetime(title=u"Webinar session end date",
+                            required=True)
+
+
+class IWebinar(interface.Interface):
+
+    description = ValidTextLine(title=u"Webinar description",
+                                required=True)
+
+    subject = ValidTextLine(title=u"Webinar subject",
+                            required=True)
+
+    organizerKey = Number(title=u"Webinar organizer key",
+                          required=True)
+
+    webinarKey = Number(title=u"Webinar key",
+                        required=True)
+
+    numberOfRegistrants = Number(title=u"Webinar registrant count",
+                                 required=True)
+
+    timeZone = ValidTextLine(title=u"Webinar timeZone",
+                             required=True)
+
+    registrationUrl = ValidTextLine(title=u"Webinar registrationUrl",
+                                    required=True)
+
+    webinarID = ValidTextLine(title=u"Webinar webinarID",
+                              required=True)
+
+    inSession = Bool(title=u"Webinar is in session",
+                     required=True)
+
+    times = ListOrTuple(Object(IWebinarSession),
+                        title=u"Webinar sessions",
+                        required=True,
+                        min_length=1)
+
+
+class IWebinarCollection(interface.Interface):
+
+    webinars = ListOrTuple(Object(IWebinar),
+                           title=u"Webinar objects",
+                           required=True,
+                           min_length=0)

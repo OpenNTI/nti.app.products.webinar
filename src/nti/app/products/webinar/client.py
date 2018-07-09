@@ -16,8 +16,10 @@ from zope import component
 from zope import interface
 
 from nti.app.products.webinar.interfaces import IWebinarClient
+from nti.app.products.webinar.interfaces import IWebinarCollection
 from nti.app.products.webinar.interfaces import IGoToWebinarAuthorizedIntegration
 
+from nti.app.products.webinar.utils import raise_error
 from nti.app.products.webinar.utils import get_access_token
 
 logger = __import__('logging').getLogger(__name__)
@@ -52,15 +54,35 @@ class GoToWebinarClient(object):
         # If fetching access token, we need to store our new refresh token
         self.request.environ['nti.request_had_transaction_side_effects'] = True
 
-    def _make_call(self, url):
+    def _make_call(self, url, post_data=None):
         if self._access_token is None:
             self._update_access_token()
-        access_header = 'Bearer %s' % self._access_token
-        response = requests.get(url,
+
+        def _do_make_call():
+            access_header = 'Bearer %s' % self._access_token
+            # FIXME:
+            #if post_data:
+            #
+            return requests.get(url,
                                 headers={'Authorization': access_header})
+        response = _do_make_call()
+        if response.status_code == 401:
+            # FIXME: verify this status code on expired token
+            # Ok, expired token, refresh and try again.
+            self._update_access_token()
+            response = _do_make_call()
+
+        if response.status_code != 200:
+            logger.warn('Error while making webinar API call (%s) (%s)',
+                        response.status_code,
+                        response.text)
+            raise_error({'message': _(u"Error during webinar call."),
+                         'code': 'WebinarClientAPIError'})
+        return response.json()
 
     def get_upcoming_webinars(self):
         url = self.UPCOMING_WEBINARS % self.authorized_integration.organizer_key
         result = self._make_call(url)
+        result = IWebinarCollection(result)
         return result
 
