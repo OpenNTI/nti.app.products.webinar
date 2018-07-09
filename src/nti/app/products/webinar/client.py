@@ -15,24 +15,10 @@ from pyramid.interfaces import IRequest
 from zope import component
 from zope import interface
 
-from nti.app.products.integration.interfaces import IIntegrationCollectionProvider
-
-from nti.app.products.integration.integration import AbstractIntegration
-from nti.app.products.integration.integration import AbstractOAuthAuthorizedIntegration
-
 from nti.app.products.webinar.interfaces import IWebinarClient
-from nti.app.products.webinar.interfaces import IWebinarIntegration
 from nti.app.products.webinar.interfaces import IGoToWebinarAuthorizedIntegration
 
 from nti.app.products.webinar.utils import get_access_token
-
-from nti.dublincore.time_mixins import PersistentCreatedAndModifiedTimeObject
-
-from nti.externalization.representation import WithRepr
-
-from nti.schema.fieldproperty import createDirectFieldProperties
-
-from nti.schema.schema import SchemaConfigured
 
 logger = __import__('logging').getLogger(__name__)
 
