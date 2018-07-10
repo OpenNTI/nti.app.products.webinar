@@ -17,7 +17,7 @@ from nti.app.products.integration.integration import AbstractIntegration
 from nti.app.products.integration.integration import AbstractOAuthAuthorizedIntegration
 
 from nti.app.products.webinar.interfaces import IWebinarIntegration
-from nti.app.products.webinar.interfaces import IWebinarAuthorizedIntegration
+from nti.app.products.webinar.interfaces import IGoToWebinarAuthorizedIntegration
 
 from nti.dublincore.time_mixins import PersistentCreatedAndModifiedTimeObject
 
@@ -43,20 +43,16 @@ class GoToWebinarIntegration(AbstractIntegration,
 
 
 @WithRepr
-@interface.implementer(IWebinarAuthorizedIntegration)
+@interface.implementer(IGoToWebinarAuthorizedIntegration)
 class GoToWebinarAuthorizedIntegration(AbstractOAuthAuthorizedIntegration,
                                        PersistentCreatedAndModifiedTimeObject,
                                        SchemaConfigured):
 
-    createDirectFieldProperties(IWebinarAuthorizedIntegration)
+    createDirectFieldProperties(IGoToWebinarAuthorizedIntegration)
 
     __name__ = 'webinar'
 
     mimeType = mime_type = "application/vnd.nextthought.integration.gotowebinarauthorizedintegration"
-
-    def get_access_token(self):
-        # FIXME: implement
-        pass
 
 
 @interface.implementer(IIntegrationCollectionProvider)
@@ -67,7 +63,7 @@ class WebinarIntegrationProvider(object):
         Return our authorized integration if we have it, otherwise, return an
         an :class:`IIntegration` object that can be used for authorizing.
         """
-        result = component.queryUtility(IWebinarAuthorizedIntegration)
+        result = component.queryUtility(IGoToWebinarAuthorizedIntegration)
         if result is None:
             result = GoToWebinarIntegration(title=u'Integrate with GOTOWebinar')
         return (result,)

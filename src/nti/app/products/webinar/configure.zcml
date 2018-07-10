@@ -10,10 +10,21 @@
 	<include package="zope.component" />
 	<include package="zope.security" />
 
+    <!-- Adapters -->
+    <adapter factory=".client.GoToWebinarClient"
+             for=".interfaces.IGoToWebinarAuthorizedIntegration
+                  pyramid.interfaces.IRequest"
+             provides=".interfaces.IWebinarClient" />
+
     <!-- Decorators -->
-    <subscriber factory=".decorators._WebinarIntegrationDecorator"
+    <subscriber factory=".decorators._WebinarAuthorizeDecorator"
                 provides="nti.externalization.interfaces.IExternalMappingDecorator"
                 for=".interfaces.IWebinarIntegration
+                     pyramid.interfaces.IRequest"  />
+
+    <subscriber factory=".decorators._AuthorizedWebinarDecorator"
+                provides="nti.externalization.interfaces.IExternalMappingDecorator"
+                for=".interfaces.IWebinarAuthorizedIntegration
                      pyramid.interfaces.IRequest"  />
 
     <!-- Externalization -->
@@ -21,20 +32,36 @@
     <include package="nti.externalization" />
 
     <ext:registerAutoPackageIO
-        root_interfaces=".interfaces.IWebinarIntegration
+        root_interfaces=".interfaces.IWebinar
+                         .interfaces.IWebinarSession
+                         .interfaces.IWebinarCollection
+                         .interfaces.IWebinarIntegration
                          .interfaces.IWebinarAuthorizedIntegration"
         modules=".integration" />
+
+    <!-- Internalization -->
+    <adapter factory=".client_models._webinar_factory"
+             for="dict"
+             provides=".interfaces.IWebinar" />
+
+    <adapter factory=".client_models._webinar_session_factory"
+             for="dict"
+             provides=".interfaces.IWebinarSession" />
+
+    <adapter factory=".client_models._webinar_collection_factory"
+             for="list"
+             provides=".interfaces.IWebinarCollection" />
 
     <!-- Integration -->
     <utility factory=".integration.WebinarIntegrationProvider" />
 
-    <!-- Webinar auth -->
+    <!-- Webinar auth (localhost)-->
     <include package="nti.common" file="meta.zcml" />
 
     <configure zcml:condition="have devmode">
         <oauth:registerOAuthKeys
-                apiKey="FwjZl3gCGZxypCN1TsmkbdGhQc5OoTXf"
-                secretKey="LhehRClH6iEJQk35"
+                apiKey="Gd94qpGWBETXoSJDj57if13tgr2aHrPE"
+                secretKey="B8rJgJSHUsJ6UqFC"
                 id="webinar" />
     </configure>
 </configure>

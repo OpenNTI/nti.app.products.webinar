@@ -6,9 +6,7 @@ from __future__ import print_function
 from __future__ import absolute_import
 
 import os
-import base64
 import hashlib
-import requests
 
 from six.moves import urllib_parse
 
@@ -16,22 +14,21 @@ from zope import component
 
 import pyramid.httpexceptions as hexc
 
-from pyramid.threadlocal import get_current_request
-
 from pyramid.view import view_config
 
 from nti.app.base.abstract_views import AbstractAuthenticatedView
 
-from nti.app.externalization.error import raise_json_error
-
 from nti.app.products.webinar import REL_AUTH_WEBINAR
 
 from nti.app.products.webinar.interfaces import IWebinarIntegration
-from nti.app.products.webinar.interfaces import IWebinarAuthorizedIntegration
+from nti.app.products.webinar.interfaces import IGoToWebinarAuthorizedIntegration
 
 from nti.app.products.webinar.integration import GoToWebinarAuthorizedIntegration
 
-from nti.appserver import MessageFactory as _
+from nti.app.products.webinar import MessageFactory as _
+
+from nti.app.products.webinar.utils import raise_error
+from nti.app.products.webinar.utils import get_token_data
 
 from nti.common.interfaces import IOAuthKeys
 
@@ -42,31 +39,12 @@ from nti.links.externalization import render_link
 from nti.links.links import Link
 
 from nti.site.utils import registerUtility
+from nti.site.utils import unregisterUtility
 
 logger = __import__('logging').getLogger(__name__)
 
 AUTH_WEBINAR_OAUTH2 = 'authorize.webinar.oauth2'
 WEBINAR_AUTH_URL = 'https://api.getgo.com/oauth/v2/authorize'
-WEBINAR_AUTH_TOKEN_URL = 'https://api.getgo.com/oauth/v2/token'
-
-
-def raise_error(data, tb=None, factory=hexc.HTTPBadRequest, request=None):
-    request = request or get_current_request()
-    failure_redirect = request.session.get('webinar.failure')
-    if failure_redirect:
-        error_message = data.get('message')
-        if error_message:
-            parsed = urllib_parse.urlparse(failure_redirect)
-            parsed = list(parsed)
-            query = parsed[4]
-            if query:
-                query = query + '&error=' + urllib_parse.quote(error_message)
-            else:
-                query = 'error=' + urllib_parse.quote(error_message)
-            parsed[4] = query
-            failure_redirect = urllib_parse.urlunparse(parsed)
-        raise hexc.HTTPSeeOther(location=failure_redirect)
-    raise_json_error(request, factory, data, tb)
 
 
 def redirect_webinar_oauth2_uri(request):
@@ -77,9 +55,8 @@ def redirect_webinar_oauth2_uri(request):
     return result
 
 
-def redirect_webinar_oauth2_params(request, state=None, auth_keys=None):
-    if auth_keys is None:
-        auth_keys = component.getUtility(IOAuthKeys, name="webinar")
+def redirect_webinar_oauth2_params(request, state=None):
+    auth_keys = component.getUtility(IOAuthKeys, name="webinar")
     state = state or hashlib.sha256(os.urandom(1024)).hexdigest()
     params = {'state': state,
               'response_type': 'code',
@@ -160,17 +137,21 @@ class WebinarAuth2(AbstractAuthenticatedView):
     """
 
     def _create_auth_integration(self, access_data):
-        refresh_token = access_data.get('refresh_token')
         auth_integration = GoToWebinarAuthorizedIntegration(title='Authorized GOTOWebinar Integration',
-                                                            refresh_token=refresh_token)
+                                                            refresh_token=access_data.get('refresh_token'),
+                                                            account_key=access_data.get('account_key'),
+                                                            organizer_key=access_data.get('organizer_key'))
+        # Lineage through registry
+        auth_integration.__parent__ = component.getSiteManager()
+        unregisterUtility(component.getSiteManager(), provided=IGoToWebinarAuthorizedIntegration)
         registerUtility(component.getSiteManager(),
                         component=auth_integration,
-                        provided=IWebinarAuthorizedIntegration)
+                        provided=IGoToWebinarAuthorizedIntegration)
+        return auth_integration
 
     def __call__(self):
         request = self.request
         params = request.params
-        auth_keys = component.getUtility(IOAuthKeys, name="webinar")
 
         # check for errors
         if 'error' in params or 'errorCode' in params:
@@ -204,31 +185,8 @@ class WebinarAuth2(AbstractAuthenticatedView):
             data = {'code': code,
                     'grant_type': 'authorization_code',
                     'redirect_uri': redirect_webinar_oauth2_uri(request)}
-            auth_header = '%s:%s' % (auth_keys.APIKey, auth_keys.secretKey)
-            auth_header = base64.b64encode(auth_header)
-            auth_header = 'Basic %s' % auth_header
-            response = requests.post(WEBINAR_AUTH_TOKEN_URL,
-                                     data,
-                                     headers={'Authorization': auth_header})
-            if response.status_code != 200:
-                logger.warn('Error while getting webinar token (%s)',
-                            response.text)
-                raise_error({'message': _(u"Error during webinar auth."),
-                             'code': 'WebinarAuthError'})
-
-            access_data = response.json()
-            if 'access_token' not in access_data:
-                logger.warn('Missing webinar access token (%s)',
-                            access_data)
-                raise_error({'message': _(u"No webinar access token"),
-                             'code': 'WebinarAuthMissingAccessToken'})
-            if 'refresh_token' not in access_data:
-                logger.warn('Missing webinar refresh token (%s)',
-                            access_data)
-                raise_error({'message': _(u"No webinar refresh token"),
-                             'code': 'WebinarAuthMissingRefreshToken'})
-
-            self._create_auth_integration(access_data)
+            access_data = get_token_data(data)
+            auth_integration = self._create_auth_integration(access_data)
             request.environ['nti.request_had_transaction_side_effects'] = 'True'
         except Exception:
             logger.exception('Failed to authorize with webinar')
@@ -236,5 +194,8 @@ class WebinarAuth2(AbstractAuthenticatedView):
                         'code': 'WebinarAuthError'})
 
         target = request.session.get('webinar.success')
-        response = hexc.HTTPSeeOther(location=target)
+        if target:
+            response = hexc.HTTPSeeOther(location=target)
+        else:
+            response = auth_integration
         return response
