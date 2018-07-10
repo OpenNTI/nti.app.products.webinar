@@ -39,6 +39,7 @@ from nti.links.externalization import render_link
 from nti.links.links import Link
 
 from nti.site.utils import registerUtility
+from nti.site.utils import unregisterUtility
 
 logger = __import__('logging').getLogger(__name__)
 
@@ -142,6 +143,7 @@ class WebinarAuth2(AbstractAuthenticatedView):
                                                             organizer_key=access_data.get('organizer_key'))
         # Lineage through registry
         auth_integration.__parent__ = component.getSiteManager()
+        unregisterUtility(component.getSiteManager(), provided=IGoToWebinarAuthorizedIntegration)
         registerUtility(component.getSiteManager(),
                         component=auth_integration,
                         provided=IGoToWebinarAuthorizedIntegration)
