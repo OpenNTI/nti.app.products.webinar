@@ -60,11 +60,12 @@ class GoToWebinarClient(object):
 
         def _do_make_call():
             access_header = 'Bearer %s' % self._access_token
-            # FIXME:
-            #if post_data:
-            #
-            return requests.get(url,
-                                headers={'Authorization': access_header})
+            if post_data:
+                return requests.post(url, post_data,
+                                     headers={'Authorization': access_header})
+            else:
+                return requests.get(url,
+                                    headers={'Authorization': access_header})
         response = _do_make_call()
         if response.status_code == 401:
             # FIXME: verify this status code on expired token

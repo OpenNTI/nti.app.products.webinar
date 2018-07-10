@@ -45,7 +45,7 @@ def _webinar_session_factory(ext):
 
 @component.adapter(list)
 @interface.implementer(IWebinarCollection)
-def _webinar_container_factory(ext):
+def _webinar_collection_factory(ext):
     obj = WebinarCollection()
     new_ext = dict()
     new_ext['webinars'] = [IWebinar(x) for x in ext or ()]

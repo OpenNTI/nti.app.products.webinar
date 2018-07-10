@@ -43,7 +43,7 @@
              for="dict"
              provides=".interfaces.IWebinarSession" />
 
-    <adapter factory=".client_models._webinar_container_factory"
+    <adapter factory=".client_models._webinar_collection_factory"
              for="list"
              provides=".interfaces.IWebinarCollection" />
 
