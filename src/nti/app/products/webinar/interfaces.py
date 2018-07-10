@@ -18,6 +18,7 @@ from nti.app.products.integration.interfaces import IOAuthAuthorizedIntegration
 from nti.schema.field import Bool
 from nti.schema.field import Number
 from nti.schema.field import Object
+from nti.schema.field import ValidText
 from nti.schema.field import ListOrTuple
 from nti.schema.field import ValidDatetime
 from nti.schema.field import DecodingValidTextLine as ValidTextLine
@@ -96,8 +97,8 @@ class IWebinarSession(interface.Interface):
 
 class IWebinar(interface.Interface):
 
-    description = ValidTextLine(title=u"Webinar description",
-                                required=True)
+    description = ValidText(title=u"Webinar description",
+                            required=True)
 
     subject = ValidTextLine(title=u"Webinar subject",
                             required=True)
@@ -109,7 +110,7 @@ class IWebinar(interface.Interface):
                         required=True)
 
     numberOfRegistrants = Number(title=u"Webinar registrant count",
-                                 required=True)
+                                 required=False)
 
     timeZone = ValidTextLine(title=u"Webinar timeZone",
                              required=True)
