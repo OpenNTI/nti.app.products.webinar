@@ -54,10 +54,6 @@ class GoToWebinarAuthorizedIntegration(AbstractOAuthAuthorizedIntegration,
 
     mimeType = mime_type = "application/vnd.nextthought.integration.gotowebinarauthorizedintegration"
 
-    def get_access_token(self):
-        # FIXME: implement
-        pass
-
 
 @interface.implementer(IIntegrationCollectionProvider)
 class WebinarIntegrationProvider(object):
@@ -67,7 +63,7 @@ class WebinarIntegrationProvider(object):
         Return our authorized integration if we have it, otherwise, return an
         an :class:`IIntegration` object that can be used for authorizing.
         """
-        result = component.queryUtility(IWebinarAuthorizedIntegration)
+        result = component.queryUtility(IGoToWebinarAuthorizedIntegration)
         if result is None:
             result = GoToWebinarIntegration(title=u'Integrate with GOTOWebinar')
         return (result,)
