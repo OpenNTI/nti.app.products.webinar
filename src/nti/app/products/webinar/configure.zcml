@@ -55,13 +55,13 @@
     <!-- Integration -->
     <utility factory=".integration.WebinarIntegrationProvider" />
 
-    <!-- Webinar auth -->
+    <!-- Webinar auth (localhost)-->
     <include package="nti.common" file="meta.zcml" />
 
     <configure zcml:condition="have devmode">
         <oauth:registerOAuthKeys
-                apiKey="FwjZl3gCGZxypCN1TsmkbdGhQc5OoTXf"
-                secretKey="LhehRClH6iEJQk35"
+                apiKey="Gd94qpGWBETXoSJDj57if13tgr2aHrPE"
+                secretKey="B8rJgJSHUsJ6UqFC"
                 id="webinar" />
     </configure>
 </configure>
