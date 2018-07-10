@@ -63,10 +63,18 @@ def get_token_data(post_data):
                              post_data,
                              headers={'Authorization': auth_header})
     if response.status_code != 200:
-        logger.warn('Error while getting webinar token (%s)',
-                    response.text)
-        raise_error({'message': _(u"Error during webinar auth."),
-                     'code': 'WebinarAuthError'})
+        error_json = response.json()
+        if 'error' in error_json and error_json['error'] == 'invalid_grant':
+            # This is likely a lapsed account that will need to be re-authorized.
+            logger.warn('Invalid grant while getting webinar token, may need to be re-authorized (%s)',
+                        response.text)
+            raise_error({'message': _(u"Error during webinar auth, may need to re-authorize."),
+                         'code': 'WebinarInvalidAuthError'})
+        else:
+            logger.warn('Error while getting webinar token (%s)',
+                        response.text)
+            raise_error({'message': _(u"Error during webinar auth."),
+                         'code': 'WebinarAuthError'})
 
     access_data = response.json()
     if 'access_token' not in access_data:
