@@ -16,10 +16,16 @@ from zope import interface
 from zope.location.interfaces import ILocation
 
 from nti.app.products.webinar import REL_AUTH_WEBINAR
+from nti.app.products.webinar import VIEW_UPCOMING_WEBINARS
 
 from nti.app.products.webinar.interfaces import IWebinarIntegration
+from nti.app.products.webinar.interfaces import IWebinarAuthorizedIntegration
 
 from nti.app.renderers.decorators import AbstractAuthenticatedRequestAwareDecorator
+
+from nti.appserver.pyramid_authorization import has_permission
+
+from nti.dataserver.authorization import ACT_CONTENT_EDIT
 
 from nti.dataserver.authorization import is_admin_or_site_admin
 
@@ -35,10 +41,10 @@ logger = __import__('logging').getLogger(__name__)
 
 @component.adapter(IWebinarIntegration)
 @interface.implementer(IExternalMappingDecorator)
-class _WebinarIntegrationDecorator(AbstractAuthenticatedRequestAwareDecorator):
+class _WebinarAuthorizeDecorator(AbstractAuthenticatedRequestAwareDecorator):
 
     def _predicate(self, context, unused_result):
-        return super(_WebinarIntegrationDecorator, self)._predicate(context, unused_result) \
+        return super(_WebinarAuthorizeDecorator, self)._predicate(context, unused_result) \
            and is_admin_or_site_admin(self.remoteUser)
 
     def _do_decorate_external(self, context, result):
@@ -46,6 +52,25 @@ class _WebinarIntegrationDecorator(AbstractAuthenticatedRequestAwareDecorator):
         link = Link(context,
                     rel=REL_AUTH_WEBINAR,
                     elements=('@@%s' % REL_AUTH_WEBINAR,))
+        interface.alsoProvides(link, ILocation)
+        link.__name__ = ''
+        link.__parent__ = context
+        links.append(link)
+
+
+@component.adapter(IWebinarAuthorizedIntegration)
+@interface.implementer(IExternalMappingDecorator)
+class _AuthorizedWebinarDecorator(AbstractAuthenticatedRequestAwareDecorator):
+
+    def _predicate(self, context, unused_result):
+        return super(_AuthorizedWebinarDecorator, self)._predicate(context, unused_result) \
+           and has_permission(ACT_CONTENT_EDIT, context, self.request)
+
+    def _do_decorate_external(self, context, result):
+        links = result.setdefault(LINKS, [])
+        link = Link(context,
+                    rel=VIEW_UPCOMING_WEBINARS,
+                    elements=('@@%s' % VIEW_UPCOMING_WEBINARS,))
         interface.alsoProvides(link, ILocation)
         link.__name__ = ''
         link.__parent__ = context

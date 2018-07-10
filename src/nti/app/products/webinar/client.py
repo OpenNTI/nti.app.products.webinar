@@ -19,6 +19,8 @@ from nti.app.products.webinar.interfaces import IWebinarClient
 from nti.app.products.webinar.interfaces import IWebinarCollection
 from nti.app.products.webinar.interfaces import IGoToWebinarAuthorizedIntegration
 
+from nti.app.products.webinar import MessageFactory as _
+
 from nti.app.products.webinar.utils import raise_error
 from nti.app.products.webinar.utils import get_access_token
 
@@ -32,6 +34,7 @@ class GoToWebinarClient(object):
     The client to interact with making GOTO webinar API calls. This should
     live within a single request lifespan.
     """
+    GOTO_BASE_URL = 'https://api.getgo.com/G2W/rest/'
 
     GET_WEBINAR = '/organizers/%s/webinars/%s'
     UPCOMING_WEBINARS = '/organizers/%s/upcomingWebinars'
@@ -55,6 +58,7 @@ class GoToWebinarClient(object):
         self.request.environ['nti.request_had_transaction_side_effects'] = True
 
     def _make_call(self, url, post_data=None):
+        url = '%s/%s' % (self.GOTO_BASE_URL, url)
         if self._access_token is None:
             self._update_access_token()
 
@@ -85,5 +89,5 @@ class GoToWebinarClient(object):
         url = self.UPCOMING_WEBINARS % self.authorized_integration.organizer_key
         result = self._make_call(url)
         result = IWebinarCollection(result)
-        return result
+        return result.webinars
 

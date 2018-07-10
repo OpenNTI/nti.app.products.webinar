@@ -17,9 +17,14 @@
              provides=".interfaces.IWebinarClient" />
 
     <!-- Decorators -->
-    <subscriber factory=".decorators._WebinarIntegrationDecorator"
+    <subscriber factory=".decorators._WebinarAuthorizeDecorator"
                 provides="nti.externalization.interfaces.IExternalMappingDecorator"
                 for=".interfaces.IWebinarIntegration
+                     pyramid.interfaces.IRequest"  />
+
+    <subscriber factory=".decorators._AuthorizedWebinarDecorator"
+                provides="nti.externalization.interfaces.IExternalMappingDecorator"
+                for=".interfaces.IWebinarAuthorizedIntegration
                      pyramid.interfaces.IRequest"  />
 
     <!-- Externalization -->

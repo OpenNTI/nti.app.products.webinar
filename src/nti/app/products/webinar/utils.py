@@ -21,6 +21,8 @@ from zope import component
 
 from nti.app.externalization.error import raise_json_error
 
+from nti.app.products.webinar import MessageFactory as _
+
 from nti.common.interfaces import IOAuthKeys
 
 logger = __import__('logging').getLogger(__name__)
