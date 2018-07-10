@@ -58,11 +58,15 @@ class WebinarSession(SchemaConfigured):
 
     createDirectFieldProperties(IWebinarSession)
 
+    mimeType = mime_type = "application/vnd.nextthought.webinarsession"
+
 
 @interface.implementer(IWebinar)
 class Webinar(SchemaConfigured):
 
     createDirectFieldProperties(IWebinar)
+
+    mimeType = mime_type = "application/vnd.nextthought.webinar"
 
     sessions = alias('times')
     __parent__ = None
@@ -76,3 +80,6 @@ class Webinar(SchemaConfigured):
 class WebinarCollection(SchemaConfigured):
 
     createDirectFieldProperties(IWebinarCollection)
+
+    mimeType = mime_type = "application/vnd.nextthought.webinarcollection"
+
