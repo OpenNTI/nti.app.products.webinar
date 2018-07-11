@@ -30,7 +30,7 @@ from nti.app.products.webinar.utils import get_token_data
 
 from nti.common.interfaces import IOAuthKeys
 
-from nti.dataserver.authorization import is_admin_or_site_admin
+from nti.dataserver.authorization import ACT_CONTENT_EDIT
 
 from nti.links.externalization import render_link
 
@@ -67,6 +67,7 @@ def redirect_webinar_oauth2_params(request, state=None):
              context=IWebinarIntegration,
              renderer='rest',
              request_method='GET',
+             permission=ACT_CONTENT_EDIT,
              name=REL_AUTH_WEBINAR)
 class WebinarAuth(AbstractAuthenticatedView):
     """
@@ -77,16 +78,7 @@ class WebinarAuth(AbstractAuthenticatedView):
     e.g. https://api.getgo.com/oauth/v2/authorize?client_id={consumerKey}&response_type=code&state=MyTest&redirect_uri=http%3A%2F%2Fcode.example.com
     """
 
-    def _check_access(self):
-        # FIXME: should be edit perms on context
-        if not is_admin_or_site_admin(self.remoteUser):
-            raise_error(
-                        {'message': _(u"Cannot view user bundle record."),
-                         'code': 'Cannot ',},
-                        factory=hexc.HTTPForbidden)
-
     def __call__(self):
-        self._check_access()
         request = self.request
         state = hashlib.sha256(os.urandom(1024)).hexdigest()
         params = redirect_webinar_oauth2_params(request, state)
@@ -111,6 +103,7 @@ class WebinarAuth(AbstractAuthenticatedView):
              context=IWebinarIntegration,
              renderer='rest',
              request_method='GET',
+             permission=ACT_CONTENT_EDIT,
              name=AUTH_WEBINAR_OAUTH2)
 class WebinarAuth2(AbstractAuthenticatedView):
     """

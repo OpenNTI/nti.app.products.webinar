@@ -33,12 +33,13 @@
 
     <ext:registerAutoPackageIO
         root_interfaces=".interfaces.IWebinar
+                         .interfaces.IWebinarAsset
                          .interfaces.IWebinarSession
                          .interfaces.IWebinarCollection
                          .interfaces.IWebinarIntegration
                          .interfaces.IWebinarAuthorizedIntegration
                          .interfaces.IGoToWebinarAuthorizedIntegration"
-        modules=".integration" />
+        modules=".integration .assets .client_models" />
 
     <!-- Internalization -->
     <adapter factory=".integration._auth_webinar_factory"
@@ -56,6 +57,10 @@
     <adapter factory=".client_models._webinar_collection_factory"
              for="list"
              provides=".interfaces.IWebinarCollection" />
+
+    <adapter factory=".internalization._WebinarAssetUpdater"
+             provides="nti.externalization.interfaces.IInternalObjectUpdater"
+             for=".interfaces.IWebinarAsset" />
 
     <!-- Integration -->
     <utility factory=".integration.WebinarIntegrationProvider" />
