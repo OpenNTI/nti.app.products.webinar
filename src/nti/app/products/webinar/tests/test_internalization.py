@@ -58,6 +58,7 @@ class TestWebinarInternalization(unittest.TestCase):
 
     def test_webinar_asset(self):
         factory = find_factory_for(webinar_asset_json)
+        from IPython.terminal.debugger import set_trace;set_trace()
         assert_that(factory, not_none())
         webinar_asset = factory()
         update_from_external_object(webinar_asset, webinar_asset_json, require_updater=True)

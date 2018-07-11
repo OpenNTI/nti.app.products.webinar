@@ -18,6 +18,7 @@ from nti.app.products.webinar import VIEW_UPCOMING_WEBINARS
 
 from nti.app.products.webinar.interfaces import IWebinarClient
 from nti.app.products.webinar.interfaces import IWebinarAuthorizedIntegration
+from nti.app.products.webinar.interfaces import IGoToWebinarAuthorizedIntegration
 
 from nti.app.base.abstract_views import AbstractAuthenticatedView
 
@@ -37,18 +38,18 @@ logger = __import__('logging').getLogger(__name__)
 
 
 @view_config(route_name='objects.generic.traversal',
-             context=IWebinarAuthorizedIntegration,
+             context=IGoToWebinarAuthorizedIntegration,
              request_method='DELETE',
              permission=ACT_CONTENT_EDIT,
              renderer='rest')
-class WebinarIntegrationDeleteView(AbstractAuthenticatedView):
+class GoToWebinarIntegrationDeleteView(AbstractAuthenticatedView):
     """
     Allow deleting (unauthorizing) a :class:`IWebinarAuthorizedIntegration`.
     """
 
     def __call__(self):
         registry = component.getSiteManager()
-        unregisterUtility(registry, provided=IWebinarAuthorizedIntegration)
+        unregisterUtility(registry, provided=IGoToWebinarAuthorizedIntegration)
         return hexc.HTTPNoContent()
 
 
@@ -56,13 +57,11 @@ class WebinarIntegrationDeleteView(AbstractAuthenticatedView):
              context=IWebinarAuthorizedIntegration,
              request_method='GET',
              name=VIEW_UPCOMING_WEBINARS,
+             permission=ACT_CONTENT_EDIT,
              renderer='rest')
 class UpcomingWebinarsView(AbstractAuthenticatedView):
     """
     Fetch the upcoming webinars for an :class:`IWebinarAuthorizedIntegration`.
-
-    FIXME: permission
-    permission=ACT_CONTENT_EDIT,
     """
 
     def __call__(self):
