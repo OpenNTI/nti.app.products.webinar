@@ -48,6 +48,14 @@ class IGoToWebinarAuthorizedIntegration(IWebinarAuthorizedIntegration):
     account_key = ValidTextLine(title=u"GOTOWebinar account key",
                                 required=True)
 
+    webinar_realname = ValidTextLine(title=u'GOTO account realname',
+                                     required=False)
+
+    webinar_email = ValidTextLine(title=u'GOTO account email',
+                                  required=False)
+
+    webinar_email.setTaggedValue('_ext_excluded_out', True)
+
 
 class IWebinarClient(interface.Interface):
     """
