@@ -15,6 +15,10 @@ from zope import interface
 from nti.app.products.integration.interfaces import IIntegration
 from nti.app.products.integration.interfaces import IOAuthAuthorizedIntegration
 
+from nti.contenttypes.presentation.interfaces import IUserCreatedAsset
+from nti.contenttypes.presentation.interfaces import IGroupOverViewable
+from nti.contenttypes.presentation.interfaces import ICoursePresentationAsset
+
 from nti.schema.field import Bool
 from nti.schema.field import Number
 from nti.schema.field import Object
@@ -144,3 +148,19 @@ class IWebinarCollection(interface.Interface):
                            title=u"Webinar objects",
                            required=True,
                            min_length=0)
+
+
+class IWebinarAsset(ICoursePresentationAsset,
+                    IUserCreatedAsset,
+                    IGroupOverViewable):
+    """
+    A presentation asset for webinars.
+    """
+
+    title = ValidTextLine(title=u"The webinar asset title",
+                          required=False)
+
+    description = ValidTextLine(title=u"The webinar asset description",
+                                required=False)
+
+    webinar = Object(IWebinar, required=True)

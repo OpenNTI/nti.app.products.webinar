@@ -15,6 +15,8 @@ from nti.app.products.webinar.interfaces import IWebinar
 from nti.app.products.webinar.interfaces import IWebinarSession
 from nti.app.products.webinar.interfaces import IWebinarCollection
 
+from nti.dublincore.time_mixins import PersistentCreatedAndModifiedTimeObject
+
 from nti.externalization.internalization import update_from_external_object
 
 from nti.property.property import alias
@@ -54,7 +56,8 @@ def _webinar_collection_factory(ext):
 
 
 @interface.implementer(IWebinarSession)
-class WebinarSession(SchemaConfigured):
+class WebinarSession(PersistentCreatedAndModifiedTimeObject,
+                     SchemaConfigured):
 
     createDirectFieldProperties(IWebinarSession)
 
@@ -62,7 +65,8 @@ class WebinarSession(SchemaConfigured):
 
 
 @interface.implementer(IWebinar)
-class Webinar(SchemaConfigured):
+class Webinar(PersistentCreatedAndModifiedTimeObject,
+              SchemaConfigured):
 
     createDirectFieldProperties(IWebinar)
 
