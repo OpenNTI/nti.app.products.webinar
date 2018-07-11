@@ -23,8 +23,6 @@ from nti.app.products.webinar import REL_AUTH_WEBINAR
 from nti.app.products.webinar.interfaces import IWebinarIntegration
 from nti.app.products.webinar.interfaces import IGoToWebinarAuthorizedIntegration
 
-from nti.app.products.webinar.integration import GoToWebinarAuthorizedIntegration
-
 from nti.app.products.webinar import MessageFactory as _
 
 from nti.app.products.webinar.utils import raise_error
@@ -80,9 +78,15 @@ class WebinarAuth(AbstractAuthenticatedView):
     """
 
     def _check_access(self):
-        return is_admin_or_site_admin(self.remoteUser)
+        # FIXME: should be edit perms on context
+        if not is_admin_or_site_admin(self.remoteUser):
+            raise_error(
+                        {'message': _(u"Cannot view user bundle record."),
+                         'code': 'Cannot ',},
+                        factory=hexc.HTTPForbidden)
 
     def __call__(self):
+        self._check_access()
         request = self.request
         state = hashlib.sha256(os.urandom(1024)).hexdigest()
         params = redirect_webinar_oauth2_params(request, state)
@@ -137,10 +141,8 @@ class WebinarAuth2(AbstractAuthenticatedView):
     """
 
     def _create_auth_integration(self, access_data):
-        auth_integration = GoToWebinarAuthorizedIntegration(title='Authorized GOTOWebinar Integration',
-                                                            refresh_token=access_data.get('refresh_token'),
-                                                            account_key=access_data.get('account_key'),
-                                                            organizer_key=access_data.get('organizer_key'))
+        auth_integration = IGoToWebinarAuthorizedIntegration(access_data)
+        auth_integration.creator = self.remoteUser.username
         # Lineage through registry
         auth_integration.__parent__ = component.getSiteManager()
         unregisterUtility(component.getSiteManager(), provided=IGoToWebinarAuthorizedIntegration)

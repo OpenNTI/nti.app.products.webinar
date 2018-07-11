@@ -36,10 +36,15 @@
                          .interfaces.IWebinarSession
                          .interfaces.IWebinarCollection
                          .interfaces.IWebinarIntegration
-                         .interfaces.IWebinarAuthorizedIntegration"
+                         .interfaces.IWebinarAuthorizedIntegration
+                         .interfaces.IGoToWebinarAuthorizedIntegration"
         modules=".integration" />
 
     <!-- Internalization -->
+    <adapter factory=".integration._auth_webinar_factory"
+             for="dict"
+             provides=".interfaces.IGoToWebinarAuthorizedIntegration" />
+
     <adapter factory=".client_models._webinar_factory"
              for="dict"
              provides=".interfaces.IWebinar" />
