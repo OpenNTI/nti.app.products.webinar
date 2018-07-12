@@ -12,13 +12,20 @@ from pyramid import httpexceptions as hexc
 
 from pyramid.view import view_config
 
+from requests.structures import CaseInsensitiveDict
+
 from zope import component
 
+from nti.app.products.webinar import VIEW_RESOLVE_WEBINAR
 from nti.app.products.webinar import VIEW_UPCOMING_WEBINARS
+
+from nti.app.products.webinar import MessageFactory as _
 
 from nti.app.products.webinar.interfaces import IWebinarClient
 from nti.app.products.webinar.interfaces import IWebinarAuthorizedIntegration
 from nti.app.products.webinar.interfaces import IGoToWebinarAuthorizedIntegration
+
+from nti.app.products.webinar.utils import raise_error
 
 from nti.app.base.abstract_views import AbstractAuthenticatedView
 
@@ -71,4 +78,52 @@ class UpcomingWebinarsView(AbstractAuthenticatedView):
         result = LocatedExternalDict()
         result[ITEMS] = webinars
         result[TOTAL] = result[ITEM_COUNT] = len(webinars)
+        return result
+
+
+@view_config(route_name='objects.generic.traversal',
+             context=IWebinarAuthorizedIntegration,
+             request_method='GET',
+             name=VIEW_RESOLVE_WEBINAR,
+             permission=ACT_CONTENT_EDIT,
+             renderer='rest')
+class ResolveWebinarView(AbstractAuthenticatedView):
+    """
+    Fetch the upcoming webinars for an :class:`IWebinarAuthorizedIntegration`.
+    """
+
+    def get_webinar_param(self):
+        values = self.request.params
+        result = CaseInsensitiveDict(values)
+        return result.get('webinar') \
+            or result.get('webinar_key') \
+            or result.get('key') \
+            or result.get('webinar_url')
+
+    def get_webinar_key(self, webinar_param):
+        """
+        We may have a url or a key here. The trailing part of the registration
+        url is the webinar key.
+
+        e.g. https://attendee.gotowebinar.com/register/2665275951356935169
+        """
+        if not webinar_param:
+            return
+        if webinar_param.endswith('/'):
+            webinar_param = webinar_param[:-1]
+        return webinar_param.rsplit('/')[-1]
+
+    def __call__(self):
+        webinar_param = self.get_webinar_param()
+        webinar_key = self.get_webinar_key(webinar_param)
+        if not webinar_key:
+            raise_error({'message': _(u"Must supply webinar key."),
+                         'code': 'MissingWebinarURLError'})
+        client = component.queryMultiAdapter((self.context, self.request),
+                                             IWebinarClient)
+        result = client.get_webinar(webinar_key)
+        if not result:
+            raise_error({'message': _(u"Cannot resolve webinar for given key."),
+                         'code': 'CannotResolveWebinarError'},
+                        factory=hexc.HTTPNotFound)
         return result
