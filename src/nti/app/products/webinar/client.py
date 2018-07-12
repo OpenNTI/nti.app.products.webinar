@@ -15,6 +15,7 @@ from pyramid.interfaces import IRequest
 from zope import component
 from zope import interface
 
+from nti.app.products.webinar.interfaces import IWebinar
 from nti.app.products.webinar.interfaces import IWebinarClient
 from nti.app.products.webinar.interfaces import IWebinarCollection
 from nti.app.products.webinar.interfaces import IGoToWebinarAuthorizedIntegration
@@ -57,7 +58,9 @@ class GoToWebinarClient(object):
         # If fetching access token, we need to store our new refresh token
         self.request.environ['nti.request_had_transaction_side_effects'] = True
 
-    def _make_call(self, url, post_data=None):
+    def _make_call(self, url, post_data=None, acceptable_return_codes=None):
+        if not acceptable_return_codes:
+            acceptable_return_codes = (200,)
         url = '%s/%s' % (self.GOTO_BASE_URL, url)
         if self._access_token is None:
             self._update_access_token()
@@ -77,17 +80,25 @@ class GoToWebinarClient(object):
             self._update_access_token()
             response = _do_make_call()
 
-        if response.status_code != 200:
+        if response.status_code not in acceptable_return_codes:
             logger.warn('Error while making webinar API call (%s) (%s)',
                         response.status_code,
                         response.text)
             raise_error({'message': _(u"Error during webinar call."),
                          'code': 'WebinarClientAPIError'})
-        return response.json()
+        return response
 
     def get_upcoming_webinars(self):
         url = self.UPCOMING_WEBINARS % self.authorized_integration.organizer_key
         result = self._make_call(url)
-        result = IWebinarCollection(result)
+        result = IWebinarCollection(result.json())
         return result.webinars
+
+    def get_webinar(self, webinar_key):
+        url = self.GET_WEBINAR % (self.authorized_integration.organizer_key, webinar_key)
+        get_response = self._make_call(url, acceptable_return_codes=(200, 404))
+        result = None
+        if get_response.status_code != 404:
+            result = IWebinar(get_response.json())
+        return result
 

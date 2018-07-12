@@ -16,6 +16,7 @@ from zope import interface
 from zope.location.interfaces import ILocation
 
 from nti.app.products.webinar import REL_AUTH_WEBINAR
+from nti.app.products.webinar import VIEW_RESOLVE_WEBINAR
 from nti.app.products.webinar import VIEW_UPCOMING_WEBINARS
 
 from nti.app.products.webinar.interfaces import IWebinarIntegration
@@ -68,10 +69,11 @@ class _AuthorizedWebinarDecorator(AbstractAuthenticatedRequestAwareDecorator):
 
     def _do_decorate_external(self, context, result):
         links = result.setdefault(LINKS, [])
-        link = Link(context,
-                    rel=VIEW_UPCOMING_WEBINARS,
-                    elements=('@@%s' % VIEW_UPCOMING_WEBINARS,))
-        interface.alsoProvides(link, ILocation)
-        link.__name__ = ''
-        link.__parent__ = context
-        links.append(link)
+        for rel in (VIEW_RESOLVE_WEBINAR, VIEW_UPCOMING_WEBINARS):
+            link = Link(context,
+                        rel=rel,
+                        elements=('@@%s' % rel,))
+            interface.alsoProvides(link, ILocation)
+            link.__name__ = ''
+            link.__parent__ = context
+            links.append(link)
