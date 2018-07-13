@@ -90,15 +90,11 @@ def get_token_data(post_data):
     return access_data
 
 
-def get_access_token(authorized_integration):
+def get_auth_tokens(refresh_token):
     """
-    Fetch an access token and store our new refresh token.
+    Fetch an access_token and refresh_token
     """
-    data = {'refresh_token': authorized_integration.refresh_token,
+    data = {'refresh_token': refresh_token,
             'grant_type': 'refresh_token'}
     access_data = get_token_data(data)
-    authorized_integration.refresh_token = access_data.get('refresh_token')
-    # FIXME: update last mod?
-    return access_data.get('access_token')
-
-update_refresh_token = get_access_token
+    return access_data.get('access_token'), access_data.get('refresh_token')
