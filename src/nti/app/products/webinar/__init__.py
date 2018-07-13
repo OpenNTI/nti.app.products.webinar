@@ -14,6 +14,7 @@ MessageFactory = zope.i18nmessageid.MessageFactory(__name__)
 
 REL_AUTH_WEBINAR = 'authorize.webinar'
 
+VIEW_RESOLVE_WEBINAR = 'ResolveWebinar'
 VIEW_UPCOMING_WEBINARS = 'UpcomingWebinars'
 
-VIEW_RESOLVE_WEBINAR = 'ResolveWebinar'
+VIEW_WEBINAR_REGISTRATION_FIELDS = 'WebinarRegistrationFields'

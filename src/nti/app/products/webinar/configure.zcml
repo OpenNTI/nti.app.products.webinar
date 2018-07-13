@@ -33,15 +33,30 @@
 
     <ext:registerAutoPackageIO
         root_interfaces=".interfaces.IWebinar
+                         .interfaces.IWebinarField
                          .interfaces.IWebinarAsset
                          .interfaces.IWebinarSession
+                         .interfaces.IWebinarQuestion
                          .interfaces.IWebinarCollection
                          .interfaces.IWebinarIntegration
+                         .interfaces.IWebinarRegistrationFields
                          .interfaces.IWebinarAuthorizedIntegration
                          .interfaces.IGoToWebinarAuthorizedIntegration"
         modules=".integration .assets .client_models" />
 
     <!-- Internalization -->
+    <adapter factory=".client_models._webinar_field_factory"
+             for="dict"
+             provides=".interfaces.IWebinarField" />
+
+    <adapter factory=".client_models._webinar_question_factory"
+             for="dict"
+             provides=".interfaces.IWebinarQuestion" />
+
+    <adapter factory=".client_models._webinar_registration_fields_factory"
+             for="dict"
+             provides=".interfaces.IWebinarRegistrationFields" />
+
     <adapter factory=".integration._auth_webinar_factory"
              for="dict"
              provides=".interfaces.IGoToWebinarAuthorizedIntegration" />

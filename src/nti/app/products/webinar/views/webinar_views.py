@@ -18,9 +18,11 @@ from zope import component
 
 from nti.app.products.webinar import VIEW_RESOLVE_WEBINAR
 from nti.app.products.webinar import VIEW_UPCOMING_WEBINARS
+from nti.app.products.webinar import VIEW_WEBINAR_REGISTRATION_FIELDS
 
 from nti.app.products.webinar import MessageFactory as _
 
+from nti.app.products.webinar.interfaces import IWebinar
 from nti.app.products.webinar.interfaces import IWebinarClient
 from nti.app.products.webinar.interfaces import IWebinarAuthorizedIntegration
 from nti.app.products.webinar.interfaces import IGoToWebinarAuthorizedIntegration
@@ -29,6 +31,7 @@ from nti.app.products.webinar.utils import raise_error
 
 from nti.app.base.abstract_views import AbstractAuthenticatedView
 
+from nti.dataserver.authorization import ACT_READ
 from nti.dataserver.authorization import ACT_CONTENT_EDIT
 
 from nti.externalization.externalization import StandardExternalFields
@@ -124,6 +127,29 @@ class ResolveWebinarView(AbstractAuthenticatedView):
         result = client.get_webinar(webinar_key)
         if not result:
             raise_error({'message': _(u"Cannot resolve webinar for given key."),
-                         'code': 'CannotResolveWebinarError'},
+                         'code': 'WebinarNotFoundError'},
+                        factory=hexc.HTTPNotFound)
+        return result
+
+
+@view_config(route_name='objects.generic.traversal',
+             context=IWebinar,
+             request_method='GET',
+             name=VIEW_WEBINAR_REGISTRATION_FIELDS,
+             permission=ACT_READ,
+             renderer='rest')
+class WebinarView(AbstractAuthenticatedView):
+    """
+    Fetch the :class:`IWebinarRegistrationFields` for the contextual
+    :class:`IWebinar` object.
+    """
+
+    def __call__(self):
+        client = component.queryMultiAdapter((self.context, self.request),
+                                             IWebinarClient)
+        result = client.get_registration_fields(self.context.webinarKey)
+        if not result:
+            raise_error({'message': _(u"Webinar does not exist."),
+                         'code': 'WebinarNotFoundError'},
                         factory=hexc.HTTPNotFound)
         return result

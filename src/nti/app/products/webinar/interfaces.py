@@ -19,6 +19,7 @@ from nti.contenttypes.presentation.interfaces import IUserCreatedAsset
 from nti.contenttypes.presentation.interfaces import IGroupOverViewable
 from nti.contenttypes.presentation.interfaces import ICoursePresentationAsset
 
+from nti.schema.field import Int
 from nti.schema.field import Bool
 from nti.schema.field import Number
 from nti.schema.field import Object
@@ -169,3 +170,58 @@ class IWebinarAsset(ICoursePresentationAsset,
                                 required=False)
 
     webinar = Object(IWebinar, required=True)
+
+
+class IWebinarField(interface.Interface):
+    """
+    A webinar registration field.
+    """
+
+    field = ValidTextLine(title=u"The field name",
+                          required=True)
+
+    maxSize = Int(title=u"The max size of the field",
+                  required=True)
+
+    required = Bool(title=u"required", required=True)
+
+    answers = ListOrTuple(title=u"Webinar field answers",
+                          required=False,
+                          min_length=0,
+                          value_type=ValidTextLine(title=u"The answer"))
+
+
+class IWebinarQuestion(interface.Interface):
+    """
+    A webinar registration question.
+    """
+
+    questionKey = Int(title=u"The question key",
+                      required=True)
+
+    maxSize = Int(title=u"The max size of the field",
+                  required=True)
+
+    required = Bool(title=u"required", required=True)
+
+    type = ValidTextLine(title=u"The question type",
+                         required=True)
+
+    question = ValidTextLine(title=u"The question",
+                             required=True)
+
+
+class IWebinarRegistrationFields(interface.Interface):
+    """
+    The webinar registration fields.
+    """
+
+    fields = ListOrTuple(Object(IWebinarField),
+                        title=u"Webinar fields",
+                        required=False,
+                        min_length=0)
+
+    questions = ListOrTuple(Object(IWebinarQuestion),
+                            title=u"Webinar questions",
+                            required=False,
+                            min_length=0)

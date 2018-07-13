@@ -18,6 +18,7 @@ from zope import interface
 from nti.app.products.webinar.interfaces import IWebinar
 from nti.app.products.webinar.interfaces import IWebinarClient
 from nti.app.products.webinar.interfaces import IWebinarCollection
+from nti.app.products.webinar.interfaces import IWebinarRegistrationFields
 from nti.app.products.webinar.interfaces import IGoToWebinarAuthorizedIntegration
 
 from nti.app.products.webinar import MessageFactory as _
@@ -102,5 +103,13 @@ class GoToWebinarClient(object):
         result = None
         if get_response.status_code != 404:
             result = IWebinar(get_response.json())
+        return result
+
+    def get_registration_fields(self, webinar_key):
+        url = self.REGISTER_FIELDS % (self.authorized_integration.organizer_key, webinar_key)
+        get_response = self._make_call(url, acceptable_return_codes=(200, 404))
+        result = None
+        if get_response.status_code != 404:
+            result = IWebinarRegistrationFields(get_response.json())
         return result
 

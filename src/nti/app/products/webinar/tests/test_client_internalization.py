@@ -11,7 +11,9 @@ from hamcrest import is_
 from hamcrest import has_length
 from hamcrest import assert_that
 
+import os
 import unittest
+import simplejson
 
 from nti.testing.matchers import verifiably_provides
 
@@ -20,8 +22,11 @@ from nti.externalization.externalization import to_external_object
 from nti.app.products.webinar.tests import SharedConfiguringTestLayer
 
 from nti.app.products.webinar.interfaces import IWebinar
+from nti.app.products.webinar.interfaces import IWebinarField
 from nti.app.products.webinar.interfaces import IWebinarSession
+from nti.app.products.webinar.interfaces import IWebinarQuestion
 from nti.app.products.webinar.interfaces import IWebinarCollection
+from nti.app.products.webinar.interfaces import IWebinarRegistrationFields
 
 webinar_json = {
           "numberOfRegistrants": 0,
@@ -45,6 +50,12 @@ webinar_json = {
 class TestWebinarClientInternalization(unittest.TestCase):
 
     layer = SharedConfiguringTestLayer
+
+    def _load_resource(self, name):
+        path = os.path.join(os.path.dirname(__file__), name)
+        with open(path, "r") as fp:
+            source = simplejson.loads(fp.read())
+        return source
 
     def test_webinars(self):
         webinar_container_ext = [webinar_json,]
@@ -71,3 +82,16 @@ class TestWebinarClientInternalization(unittest.TestCase):
         collection_ext = to_external_object(collection)
         assert_that(collection_ext['webinars'], has_length(1))
         assert_that(collection_ext['webinars'][0]['times'], has_length(1))
+
+    def test_webinar_registration(self):
+        registration_data = self._load_resource('fields.json')
+        fields = IWebinarRegistrationFields(registration_data)
+        assert_that(fields, verifiably_provides(IWebinarRegistrationFields))
+        assert_that(fields.fields, has_length(16))
+        assert_that(fields.questions, has_length(3))
+
+        for field in fields.fields:
+            assert_that(field, verifiably_provides(IWebinarField))
+
+        for question in fields.questions:
+            assert_that(question, verifiably_provides(IWebinarQuestion))

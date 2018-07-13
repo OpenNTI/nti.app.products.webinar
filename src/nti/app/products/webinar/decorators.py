@@ -18,7 +18,9 @@ from zope.location.interfaces import ILocation
 from nti.app.products.webinar import REL_AUTH_WEBINAR
 from nti.app.products.webinar import VIEW_RESOLVE_WEBINAR
 from nti.app.products.webinar import VIEW_UPCOMING_WEBINARS
+from nti.app.products.webinar import VIEW_WEBINAR_REGISTRATION_FIELDS
 
+from nti.app.products.webinar.interfaces import IWebinar
 from nti.app.products.webinar.interfaces import IWebinarIntegration
 from nti.app.products.webinar.interfaces import IWebinarAuthorizedIntegration
 
@@ -26,6 +28,7 @@ from nti.app.renderers.decorators import AbstractAuthenticatedRequestAwareDecora
 
 from nti.appserver.pyramid_authorization import has_permission
 
+from nti.dataserver.authorization import ACT_READ
 from nti.dataserver.authorization import ACT_CONTENT_EDIT
 
 from nti.dataserver.authorization import is_admin_or_site_admin
@@ -70,6 +73,26 @@ class _AuthorizedWebinarDecorator(AbstractAuthenticatedRequestAwareDecorator):
     def _do_decorate_external(self, context, result):
         links = result.setdefault(LINKS, [])
         for rel in (VIEW_RESOLVE_WEBINAR, VIEW_UPCOMING_WEBINARS):
+            link = Link(context,
+                        rel=rel,
+                        elements=('@@%s' % rel,))
+            interface.alsoProvides(link, ILocation)
+            link.__name__ = ''
+            link.__parent__ = context
+            links.append(link)
+
+
+@component.adapter(IWebinar)
+@interface.implementer(IExternalMappingDecorator)
+class _WebinarDecorator(AbstractAuthenticatedRequestAwareDecorator):
+
+    def _predicate(self, context, unused_result):
+        return super(_WebinarDecorator, self)._predicate(context, unused_result) \
+           and has_permission(ACT_READ, context, self.request)
+
+    def _do_decorate_external(self, context, result):
+        links = result.setdefault(LINKS, [])
+        for rel in (VIEW_WEBINAR_REGISTRATION_FIELDS,):
             link = Link(context,
                         rel=rel,
                         elements=('@@%s' % rel,))
