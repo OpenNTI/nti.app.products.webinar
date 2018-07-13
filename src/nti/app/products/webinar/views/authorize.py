@@ -32,6 +32,8 @@ from nti.common.interfaces import IOAuthKeys
 
 from nti.dataserver.authorization import ACT_CONTENT_EDIT
 
+from nti.intid.common import add_intid
+
 from nti.links.externalization import render_link
 
 from nti.links.links import Link
@@ -142,6 +144,9 @@ class WebinarAuth2(AbstractAuthenticatedView):
         registerUtility(component.getSiteManager(),
                         component=auth_integration,
                         provided=IGoToWebinarAuthorizedIntegration)
+        add_intid(auth_integration)
+        auth_integration.store_tokens(access_data['access_token'],
+                                      access_data['refresh_token'])
         return auth_integration
 
     def __call__(self):

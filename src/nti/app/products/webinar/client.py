@@ -23,7 +23,6 @@ from nti.app.products.webinar.interfaces import IGoToWebinarAuthorizedIntegratio
 from nti.app.products.webinar import MessageFactory as _
 
 from nti.app.products.webinar.utils import raise_error
-from nti.app.products.webinar.utils import get_access_token
 
 logger = __import__('logging').getLogger(__name__)
 
@@ -52,18 +51,21 @@ class GoToWebinarClient(object):
         self.request = request
         self._access_token = self.request.session.get('webinar.access_token')
 
-    def _update_access_token(self):
-        self._access_token = get_access_token(self.authorized_integration)
+    def _get_access_token(self):
+        self._access_token = self.authorized_integration.access_token
         self.request.session['webinar.access_token'] = self._access_token
-        # If fetching access token, we need to store our new refresh token
-        self.request.environ['nti.request_had_transaction_side_effects'] = True
+
+    def _update_access_token(self):
+        result = self.authorized_integration.update_tokens(self._access_token)
+        self._access_token = result
+        self.request.session['webinar.access_token'] = result
 
     def _make_call(self, url, post_data=None, acceptable_return_codes=None):
         if not acceptable_return_codes:
             acceptable_return_codes = (200,)
         url = '%s/%s' % (self.GOTO_BASE_URL, url)
         if self._access_token is None:
-            self._update_access_token()
+            self._get_access_token()
 
         def _do_make_call():
             access_header = 'Bearer %s' % self._access_token
@@ -74,7 +76,7 @@ class GoToWebinarClient(object):
                 return requests.get(url,
                                     headers={'Authorization': access_header})
         response = _do_make_call()
-        if response.status_code == 401:
+        if response.status_code in (401, 403):
             # FIXME: verify this status code on expired token
             # Ok, expired token, refresh and try again.
             self._update_access_token()
