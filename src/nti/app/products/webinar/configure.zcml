@@ -27,6 +27,11 @@
                 for=".interfaces.IWebinarAuthorizedIntegration
                      pyramid.interfaces.IRequest"  />
 
+    <subscriber factory=".decorators._WebinarDecorator"
+                provides="nti.externalization.interfaces.IExternalMappingDecorator"
+                for=".interfaces.IWebinar
+                     pyramid.interfaces.IRequest"  />
+
     <!-- Externalization -->
     <include package="nti.externalization" file="meta.zcml" />
     <include package="nti.externalization" />
