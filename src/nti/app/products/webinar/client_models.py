@@ -12,12 +12,17 @@ from zope import component
 from zope import interface
 
 from nti.app.products.webinar.interfaces import IWebinar
+from nti.app.products.webinar.interfaces import IWebinarField
 from nti.app.products.webinar.interfaces import IWebinarSession
+from nti.app.products.webinar.interfaces import IWebinarQuestion
 from nti.app.products.webinar.interfaces import IWebinarCollection
+from nti.app.products.webinar.interfaces import IWebinarRegistrationFields
 
 from nti.dublincore.time_mixins import PersistentCreatedAndModifiedTimeObject
 
 from nti.externalization.internalization import update_from_external_object
+
+from nti.ntiids.oids import to_external_ntiid_oid
 
 from nti.property.property import alias
 
@@ -26,6 +31,32 @@ from nti.schema.fieldproperty import createDirectFieldProperties
 from nti.schema.schema import SchemaConfigured
 
 logger = __import__('logging').getLogger(__name__)
+
+
+@component.adapter(dict)
+@interface.implementer(IWebinarField)
+def _webinar_field_factory(ext):
+    obj = WebinarField()
+    update_from_external_object(obj, ext)
+    return obj
+
+
+@component.adapter(dict)
+@interface.implementer(IWebinarQuestion)
+def _webinar_question_factory(ext):
+    obj = WebinarQuestion()
+    update_from_external_object(obj, ext)
+    return obj
+
+
+@component.adapter(dict)
+@interface.implementer(IWebinarRegistrationFields)
+def _webinar_registration_fields_factory(ext):
+    obj = WebinarRegistrationFields()
+    ext['fields'] = [IWebinarField(x) for x in ext['fields'] or ()]
+    ext['questions'] = [IWebinarQuestion(x) for x in ext['questions'] or ()]
+    update_from_external_object(obj, ext)
+    return obj
 
 
 @component.adapter(dict)
@@ -55,6 +86,30 @@ def _webinar_collection_factory(ext):
     return obj
 
 
+@interface.implementer(IWebinarField)
+class WebinarField(SchemaConfigured):
+
+    createDirectFieldProperties(IWebinarField)
+
+    mimeType = mime_type = "application/vnd.nextthought.webinarfield"
+
+
+@interface.implementer(IWebinarQuestion)
+class WebinarQuestion(SchemaConfigured):
+
+    createDirectFieldProperties(IWebinarQuestion)
+
+    mimeType = mime_type = "application/vnd.nextthought.webinarquestion"
+
+
+@interface.implementer(IWebinarRegistrationFields)
+class WebinarRegistrationFields(SchemaConfigured):
+
+    createDirectFieldProperties(IWebinarRegistrationFields)
+
+    mimeType = mime_type = "application/vnd.nextthought.webinarregistrationfields"
+
+
 @interface.implementer(IWebinarSession)
 class WebinarSession(PersistentCreatedAndModifiedTimeObject,
                      SchemaConfigured):
@@ -78,6 +133,11 @@ class Webinar(PersistentCreatedAndModifiedTimeObject,
     @property
     def __name__(self):
         return str(self.webinarKey)
+
+    @property
+    def ntiid(self):
+        # Let's us be traversable
+        return to_external_ntiid_oid(self)
 
 
 @interface.implementer(IWebinarCollection)

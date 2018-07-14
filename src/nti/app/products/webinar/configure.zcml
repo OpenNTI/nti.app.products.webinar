@@ -16,6 +16,15 @@
                   pyramid.interfaces.IRequest"
              provides=".interfaces.IWebinarClient" />
 
+    <adapter factory=".adapters.webinar_to_auth_integration"
+             for=".interfaces.IWebinar"
+             provides=".interfaces.IGoToWebinarAuthorizedIntegration" />
+
+    <adapter factory=".adapters.webinar_to_client"
+             for=".interfaces.IWebinar
+                  pyramid.interfaces.IRequest"
+             provides=".interfaces.IWebinarClient" />
+
     <!-- Decorators -->
     <subscriber factory=".decorators._WebinarAuthorizeDecorator"
                 provides="nti.externalization.interfaces.IExternalMappingDecorator"
@@ -27,21 +36,41 @@
                 for=".interfaces.IWebinarAuthorizedIntegration
                      pyramid.interfaces.IRequest"  />
 
+    <subscriber factory=".decorators._WebinarDecorator"
+                provides="nti.externalization.interfaces.IExternalMappingDecorator"
+                for=".interfaces.IWebinar
+                     pyramid.interfaces.IRequest"  />
+
     <!-- Externalization -->
     <include package="nti.externalization" file="meta.zcml" />
     <include package="nti.externalization" />
 
     <ext:registerAutoPackageIO
         root_interfaces=".interfaces.IWebinar
+                         .interfaces.IWebinarField
                          .interfaces.IWebinarAsset
                          .interfaces.IWebinarSession
+                         .interfaces.IWebinarQuestion
                          .interfaces.IWebinarCollection
                          .interfaces.IWebinarIntegration
+                         .interfaces.IWebinarRegistrationFields
                          .interfaces.IWebinarAuthorizedIntegration
                          .interfaces.IGoToWebinarAuthorizedIntegration"
         modules=".integration .assets .client_models" />
 
     <!-- Internalization -->
+    <adapter factory=".client_models._webinar_field_factory"
+             for="dict"
+             provides=".interfaces.IWebinarField" />
+
+    <adapter factory=".client_models._webinar_question_factory"
+             for="dict"
+             provides=".interfaces.IWebinarQuestion" />
+
+    <adapter factory=".client_models._webinar_registration_fields_factory"
+             for="dict"
+             provides=".interfaces.IWebinarRegistrationFields" />
+
     <adapter factory=".integration._auth_webinar_factory"
              for="dict"
              provides=".interfaces.IGoToWebinarAuthorizedIntegration" />
