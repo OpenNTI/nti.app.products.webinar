@@ -22,6 +22,8 @@ from nti.dublincore.time_mixins import PersistentCreatedAndModifiedTimeObject
 
 from nti.externalization.internalization import update_from_external_object
 
+from nti.ntiids.oids import to_external_ntiid_oid
+
 from nti.property.property import alias
 
 from nti.schema.fieldproperty import createDirectFieldProperties
@@ -131,6 +133,11 @@ class Webinar(PersistentCreatedAndModifiedTimeObject,
     @property
     def __name__(self):
         return str(self.webinarKey)
+
+    @property
+    def ntiid(self):
+        # Let's us be traversable
+        return to_external_ntiid_oid(self)
 
 
 @interface.implementer(IWebinarCollection)
