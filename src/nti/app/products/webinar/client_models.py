@@ -136,7 +136,7 @@ class Webinar(PersistentCreatedAndModifiedTimeObject,
 
     @property
     def ntiid(self):
-        # Let's us be traversable
+        # Let's us be linkable
         return to_external_ntiid_oid(self)
 
 

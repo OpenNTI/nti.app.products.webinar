@@ -138,7 +138,7 @@ class ResolveWebinarView(AbstractAuthenticatedView):
              name=VIEW_WEBINAR_REGISTRATION_FIELDS,
              permission=ACT_READ,
              renderer='rest')
-class WebinarView(AbstractAuthenticatedView):
+class WebinarRegistrationFieldView(AbstractAuthenticatedView):
     """
     Fetch the :class:`IWebinarRegistrationFields` for the contextual
     :class:`IWebinar` object.
