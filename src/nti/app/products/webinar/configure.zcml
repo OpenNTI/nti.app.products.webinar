@@ -25,6 +25,14 @@
                   pyramid.interfaces.IRequest"
              provides=".interfaces.IWebinarClient" />
 
+    <adapter factory=".adapters.WebinarRegistrationMetadataContainerFactory"
+             provides=".interfaces.IWebinarRegistrationMetadataContainer"
+             for=".interfaces.IWebinar" />
+
+    <adapter factory=".adapters.webinar_to_course"
+             provides="nti.contenttypes.courses.interfaces.ICourseInstance"
+             for=".interfaces.IWebinar" />
+
     <!-- Decorators -->
     <subscriber factory=".decorators._WebinarAuthorizeDecorator"
                 provides="nti.externalization.interfaces.IExternalMappingDecorator"
@@ -54,6 +62,7 @@
                          .interfaces.IWebinarCollection
                          .interfaces.IWebinarIntegration
                          .interfaces.IWebinarRegistrationFields
+                         .interfaces.IWebinarRegistrationMetadata
                          .interfaces.IWebinarAuthorizedIntegration
                          .interfaces.IGoToWebinarAuthorizedIntegration"
         modules=".integration .assets .client_models" />

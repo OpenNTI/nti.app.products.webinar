@@ -8,6 +8,8 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import absolute_import
 
+from datetime import datetime
+
 from pyramid import httpexceptions as hexc
 
 from pyramid.view import view_config
@@ -16,7 +18,11 @@ from requests.structures import CaseInsensitiveDict
 
 from zope import component
 
+from zope.event import notify
+
+from nti.app.products.webinar import VIEW_JOIN_WEBINAR
 from nti.app.products.webinar import VIEW_RESOLVE_WEBINAR
+from nti.app.products.webinar import VIEW_WEBINAR_REGISTER
 from nti.app.products.webinar import VIEW_UPCOMING_WEBINARS
 from nti.app.products.webinar import VIEW_WEBINAR_REGISTRATION_FIELDS
 
@@ -24,12 +30,16 @@ from nti.app.products.webinar import MessageFactory as _
 
 from nti.app.products.webinar.interfaces import IWebinar
 from nti.app.products.webinar.interfaces import IWebinarClient
+from nti.app.products.webinar.interfaces import JoinWebinarEvent
 from nti.app.products.webinar.interfaces import IWebinarAuthorizedIntegration
 from nti.app.products.webinar.interfaces import IGoToWebinarAuthorizedIntegration
+from nti.app.products.webinar.interfaces import IWebinarRegistrationMetadataContainer
 
 from nti.app.products.webinar.utils import raise_error
 
 from nti.app.base.abstract_views import AbstractAuthenticatedView
+
+from nti.contenttypes.courses import ICourseInstance
 
 from nti.dataserver.authorization import ACT_READ
 from nti.dataserver.authorization import ACT_CONTENT_EDIT
@@ -153,3 +163,58 @@ class WebinarRegistrationFieldView(AbstractAuthenticatedView):
                          'code': 'WebinarNotFoundError'},
                         factory=hexc.HTTPNotFound)
         return result
+
+
+@view_config(route_name='objects.generic.traversal',
+             context=IWebinar,
+             request_method='POST',
+             name=VIEW_WEBINAR_REGISTER,
+             permission=ACT_READ,
+             renderer='rest')
+class WebinarRegisterView(AbstractAuthenticatedView):
+    """
+    Allows the user to register for the contextual
+    :class:`IWebinar` object.
+    """
+
+    def __call__(self):
+        registration_data = self.request.body
+        if not registration_data:
+            raise_error({'message': _(u"Must supply registration information."),
+                         'code': 'RegistrationDataNotFoundError'})
+        client = component.queryMultiAdapter((self.context, self.request),
+                                             IWebinarClient)
+        registration_metadata = client.register_user(self.context.webinarKey,
+                                                     registration_data)
+        container = IWebinarRegistrationMetadataContainer(self.context)
+        if self.remoteUser.username not in container:
+            container[self.remoteUser.username] = registration_metadata
+        return registration_metadata
+
+
+@view_config(route_name='objects.generic.traversal',
+             context=IWebinar,
+             request_method='GET',
+             name=VIEW_JOIN_WEBINAR,
+             permission=ACT_READ,
+             renderer='rest')
+class JoinWebinarView(AbstractAuthenticatedView):
+    """
+    Allows the user to join the contextual :class:`IWebinar` object.
+    """
+
+    def __call__(self):
+        container = IWebinarRegistrationMetadataContainer(self.context)
+        if self.remoteUser.username not in container:
+            # XXX: What do we do here?
+            raise_error({'message': _(u"Webinar registration does not exist."),
+                         'code': 'WebinarRegistrationNotFoundError'},
+                        factory=hexc.HTTPNotFound)
+        registration_metadata = container[self.remoteUser.username]
+        course = ICourseInstance(self.context)
+        notify(JoinWebinarEvent(user=self.remoteUser,
+                                course=course,
+                                webinar=self.context,
+                                timestamp=datetime.utcnow()))
+        self.request.environ['nti.request_had_transaction_side_effects'] = 'True'
+        raise hexc.HTTPSeeOther(location=registration_metadata.join_url)

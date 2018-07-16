@@ -15,6 +15,8 @@ from pyramid.interfaces import IRequest
 from zope import component
 from zope import interface
 
+from nti.app.products.webinar.client_models import WebinarRegistrationMetadata
+
 from nti.app.products.webinar.interfaces import IWebinar
 from nti.app.products.webinar.interfaces import IWebinarClient
 from nti.app.products.webinar.interfaces import IWebinarCollection
@@ -115,12 +117,17 @@ class GoToWebinarClient(object):
 
     def register_user(self, webinar_key, registration_data):
         url = self.WEBINAR_URL % (self.authorized_integration.organizer_key, webinar_key)
-        get_response = self._make_call(url,
-                                       post_data=registration_data)
+        # 409 if user is already registered
+        response = self._make_call(url,
+                                   post_data=registration_data,
+                                   acceptable_return_codes=(200, 409))
+        data = response.json()
         logger.info('Registered user for webinar (%s:%s) (%s) (%s)',
                     self.authorized_integration.organizer_key,
                     webinar_key,
                     self.remoteUser,
-                    get_response.json())
-        return get_response.json()
-
+                    data)
+        return WebinarRegistrationMetadata(registrant_key=data.get('registrantKey'),
+                                           join_url=data.get('joinUrl'),
+                                           webinar_key=webinar_key,
+                                           organizer_key=self.authorized_integration.organizer_key)

@@ -11,12 +11,15 @@ from __future__ import absolute_import
 from zope import component
 from zope import interface
 
+from zope.annotation.interfaces import IAttributeAnnotatable
+
 from nti.app.products.webinar.interfaces import IWebinar
 from nti.app.products.webinar.interfaces import IWebinarField
 from nti.app.products.webinar.interfaces import IWebinarSession
 from nti.app.products.webinar.interfaces import IWebinarQuestion
 from nti.app.products.webinar.interfaces import IWebinarCollection
 from nti.app.products.webinar.interfaces import IWebinarRegistrationFields
+from nti.app.products.webinar.interfaces import IWebinarRegistrationMetadata
 
 from nti.dublincore.time_mixins import PersistentCreatedAndModifiedTimeObject
 
@@ -119,7 +122,7 @@ class WebinarSession(PersistentCreatedAndModifiedTimeObject,
     mimeType = mime_type = "application/vnd.nextthought.webinarsession"
 
 
-@interface.implementer(IWebinar)
+@interface.implementer(IWebinar, IAttributeAnnotatable)
 class Webinar(PersistentCreatedAndModifiedTimeObject,
               SchemaConfigured):
 
@@ -147,3 +150,21 @@ class WebinarCollection(SchemaConfigured):
 
     mimeType = mime_type = "application/vnd.nextthought.webinarcollection"
 
+
+@interface.implementer(IWebinarRegistrationMetadata)
+class WebinarRegistrationMetadata(PersistentCreatedAndModifiedTimeObject,
+                                  SchemaConfigured):
+    """
+    A :class:`IWebinarRegistration` object.
+    """
+
+    createDirectFieldProperties(IWebinarRegistrationMetadata)
+
+    mimeType = mime_type = "application/vnd.nextthought.webinarregistrationmetadata"
+
+    __parent__ = None
+
+    @property
+    def ntiid(self):
+        # Let's us be linkable
+        return to_external_ntiid_oid(self)

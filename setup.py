@@ -61,6 +61,7 @@ setup(
         'six',
         'nti.app.products.integration',
         'nti.contenttypes.presentation',
+        'nti.contenttypes.courses',
         'zope.component',
         'zope.i18nmessageid',
         'zope.interface',
