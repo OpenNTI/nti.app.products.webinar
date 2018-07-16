@@ -103,6 +103,11 @@ class IWebinarClient(interface.Interface):
         Get the registration fields for the given :class:`IWebinar`.
         """
 
+    def register_user(webinar_key, registration_data):
+        """
+        Register a user given the registration_data.
+        """
+
 
 class IWebinarSession(interface.Interface):
 

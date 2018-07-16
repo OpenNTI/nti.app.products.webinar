@@ -37,7 +37,7 @@ class GoToWebinarClient(object):
     """
     GOTO_BASE_URL = 'https://api.getgo.com/G2W/rest/'
 
-    GET_WEBINAR = '/organizers/%s/webinars/%s'
+    WEBINAR_URL = '/organizers/%s/webinars/%s'
     UPCOMING_WEBINARS = '/organizers/%s/upcomingWebinars'
 
     WEBINAR_SESSIONS = '/organizers/%s/webinars/%s/sessions'
@@ -98,7 +98,7 @@ class GoToWebinarClient(object):
         return result.webinars
 
     def get_webinar(self, webinar_key):
-        url = self.GET_WEBINAR % (self.authorized_integration.organizer_key, webinar_key)
+        url = self.WEBINAR_URL % (self.authorized_integration.organizer_key, webinar_key)
         get_response = self._make_call(url, acceptable_return_codes=(200, 404))
         result = None
         if get_response.status_code != 404:
@@ -112,4 +112,15 @@ class GoToWebinarClient(object):
         if get_response.status_code != 404:
             result = IWebinarRegistrationFields(get_response.json())
         return result
+
+    def register_user(self, webinar_key, registration_data):
+        url = self.WEBINAR_URL % (self.authorized_integration.organizer_key, webinar_key)
+        get_response = self._make_call(url,
+                                       post_data=registration_data)
+        logger.info('Registered user for webinar (%s:%s) (%s) (%s)',
+                    self.authorized_integration.organizer_key,
+                    webinar_key,
+                    self.remoteUser,
+                    get_response.json())
+        return get_response.json()
 

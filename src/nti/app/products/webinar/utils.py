@@ -15,8 +15,6 @@ import pyramid.httpexceptions as hexc
 
 from pyramid.threadlocal import get_current_request
 
-from six.moves import urllib_parse
-
 from zope import component
 
 from nti.app.externalization.error import raise_json_error
@@ -33,20 +31,6 @@ WEBINAR_AUTH_TOKEN_URL = "https://api.getgo.com/oauth/v2/token"
 
 def raise_error(data, tb=None, factory=hexc.HTTPBadRequest, request=None):
     request = request or get_current_request()
-    failure_redirect = request.session.get('webinar.failure')
-    if failure_redirect:
-        error_message = data.get('message')
-        if error_message:
-            parsed = urllib_parse.urlparse(failure_redirect)
-            parsed = list(parsed)
-            query = parsed[4]
-            if query:
-                query = query + '&error=' + urllib_parse.quote(error_message)
-            else:
-                query = 'error=' + urllib_parse.quote(error_message)
-            parsed[4] = query
-            failure_redirect = urllib_parse.urlunparse(parsed)
-        raise hexc.HTTPSeeOther(location=failure_redirect)
     raise_json_error(request, factory, data, tb)
 
 

@@ -14,9 +14,13 @@ from zope import component
 
 import pyramid.httpexceptions as hexc
 
+from pyramid.threadlocal import get_current_request
+
 from pyramid.view import view_config
 
 from nti.app.base.abstract_views import AbstractAuthenticatedView
+
+from nti.app.externalization.error import raise_json_error
 
 from nti.app.products.webinar import REL_AUTH_WEBINAR
 
@@ -25,7 +29,6 @@ from nti.app.products.webinar.interfaces import IGoToWebinarAuthorizedIntegratio
 
 from nti.app.products.webinar import MessageFactory as _
 
-from nti.app.products.webinar.utils import raise_error
 from nti.app.products.webinar.utils import get_token_data
 
 from nti.common.interfaces import IOAuthKeys
@@ -45,6 +48,25 @@ logger = __import__('logging').getLogger(__name__)
 
 AUTH_WEBINAR_OAUTH2 = 'authorize.webinar.oauth2'
 WEBINAR_AUTH_URL = 'https://api.getgo.com/oauth/v2/authorize'
+
+
+def raise_error(data, tb=None, factory=hexc.HTTPBadRequest, request=None):
+    request = request or get_current_request()
+    failure_redirect = request.session.get('webinar.failure')
+    if failure_redirect:
+        error_message = data.get('message')
+        if error_message:
+            parsed = urllib_parse.urlparse(failure_redirect)
+            parsed = list(parsed)
+            query = parsed[4]
+            if query:
+                query = query + '&error=' + urllib_parse.quote(error_message)
+            else:
+                query = 'error=' + urllib_parse.quote(error_message)
+            parsed[4] = query
+            failure_redirect = urllib_parse.urlunparse(parsed)
+        raise hexc.HTTPSeeOther(location=failure_redirect)
+    raise_json_error(request, factory, data, tb)
 
 
 def redirect_webinar_oauth2_uri(request):
