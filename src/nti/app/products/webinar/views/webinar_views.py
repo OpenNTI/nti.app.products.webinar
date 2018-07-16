@@ -39,7 +39,7 @@ from nti.app.products.webinar.utils import raise_error
 
 from nti.app.base.abstract_views import AbstractAuthenticatedView
 
-from nti.contenttypes.courses import ICourseInstance
+from nti.contenttypes.courses.interfaces import ICourseInstance
 
 from nti.dataserver.authorization import ACT_READ
 from nti.dataserver.authorization import ACT_CONTENT_EDIT
