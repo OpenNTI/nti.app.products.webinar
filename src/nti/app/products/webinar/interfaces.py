@@ -126,11 +126,11 @@ class IWebinar(interface.Interface):
     subject = ValidTextLine(title=u"Webinar subject",
                             required=True)
 
-    organizerKey = Number(title=u"Webinar organizer key",
-                          required=True)
+    organizerKey = ValidTextLine(title=u"Webinar organizer key",
+                                 required=True)
 
-    webinarKey = Number(title=u"Webinar key",
-                        required=True)
+    webinarKey = ValidTextLine(title=u"Webinar key",
+                               required=True)
 
     numberOfRegistrants = Number(title=u"Webinar registrant count",
                                  required=False)
