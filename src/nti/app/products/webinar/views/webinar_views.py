@@ -90,9 +90,12 @@ class UpcomingWebinarsView(AbstractAuthenticatedView):
              name=VIEW_RESOLVE_WEBINAR,
              permission=ACT_CONTENT_EDIT,
              renderer='rest')
-class ResolveWebinarView(AbstractAuthenticatedView):
+class ResolveWebinarsView(UpcomingWebinarsView):
     """
-    Fetch the upcoming webinars for an :class:`IWebinarAuthorizedIntegration`.
+    Fetch the upcoming webinar for a given filter url or webinarKey. Through
+    the UI, a registration URL will give the user an option of available
+    webinars to choose from; we mimic that here by returning all the possible
+    webinars if a registrationUrl is given.
     """
 
     def get_webinar_param(self):
@@ -103,32 +106,23 @@ class ResolveWebinarView(AbstractAuthenticatedView):
             or result.get('key') \
             or result.get('webinar_url')
 
-    def get_webinar_key(self, webinar_param):
+    def filter_webinars(self, webinars, include_filter):
         """
-        We may have a url or a key here. The trailing part of the registration
-        url is the webinar key.
-
-        e.g. https://attendee.gotowebinar.com/register/2665275951356935169
+        Include anything matching on webinarKey or registrationUrl.
         """
-        if not webinar_param:
-            return
-        if webinar_param.endswith('/'):
-            webinar_param = webinar_param[:-1]
-        return webinar_param.rsplit('/')[-1]
+        return [x for x in webinars
+                if x.webinarKey == include_filter \
+                or x.registrationUrl == include_filter]
 
     def __call__(self):
-        webinar_param = self.get_webinar_param()
-        webinar_key = self.get_webinar_key(webinar_param)
-        if not webinar_key:
+        webinar_filter = self.get_webinar_param()
+        if not webinar_filter:
             raise_error({'message': _(u"Must supply webinar key."),
                          'code': 'MissingWebinarURLError'})
-        client = component.queryMultiAdapter((self.context, self.request),
-                                             IWebinarClient)
-        result = client.get_webinar(webinar_key)
-        if not result:
-            raise_error({'message': _(u"Cannot resolve webinar for given key."),
-                         'code': 'WebinarNotFoundError'},
-                        factory=hexc.HTTPNotFound)
+        result = super(ResolveWebinarsView, self).__call__()
+        result[ITEMS] = self.filter_webinars(result[ITEMS],
+                                             webinar_filter)
+        result[ITEM_COUNT] = len(result[ITEMS])
         return result
 
 
