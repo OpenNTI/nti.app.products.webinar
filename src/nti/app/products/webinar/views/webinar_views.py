@@ -20,6 +20,10 @@ from zope import component
 
 from zope.event import notify
 
+from nti.app.base.abstract_views import AbstractAuthenticatedView
+
+from nti.app.externalization.view_mixins import ModeledContentUploadRequestUtilsMixin
+
 from nti.app.products.webinar import VIEW_JOIN_WEBINAR
 from nti.app.products.webinar import VIEW_RESOLVE_WEBINAR
 from nti.app.products.webinar import VIEW_WEBINAR_REGISTER
@@ -31,13 +35,12 @@ from nti.app.products.webinar import MessageFactory as _
 from nti.app.products.webinar.interfaces import IWebinar
 from nti.app.products.webinar.interfaces import IWebinarClient
 from nti.app.products.webinar.interfaces import JoinWebinarEvent
+from nti.app.products.webinar.interfaces import WebinarRegistrationError
 from nti.app.products.webinar.interfaces import IWebinarAuthorizedIntegration
 from nti.app.products.webinar.interfaces import IGoToWebinarAuthorizedIntegration
 from nti.app.products.webinar.interfaces import IWebinarRegistrationMetadataContainer
 
 from nti.app.products.webinar.utils import raise_error
-
-from nti.app.base.abstract_views import AbstractAuthenticatedView
 
 from nti.contenttypes.courses.interfaces import ICourseInstance
 
@@ -171,21 +174,35 @@ class WebinarRegistrationFieldView(AbstractAuthenticatedView):
              name=VIEW_WEBINAR_REGISTER,
              permission=ACT_READ,
              renderer='rest')
-class WebinarRegisterView(AbstractAuthenticatedView):
+class WebinarRegisterView(AbstractAuthenticatedView,
+                          ModeledContentUploadRequestUtilsMixin):
     """
     Allows the user to register for the contextual
     :class:`IWebinar` object.
     """
 
     def __call__(self):
-        registration_data = self.request.body
+        registration_data = self.readInput()
         if not registration_data:
             raise_error({'message': _(u"Must supply registration information."),
                          'code': 'RegistrationDataNotFoundError'})
         client = component.queryMultiAdapter((self.context, self.request),
                                              IWebinarClient)
-        registration_metadata = client.register_user(self.context.webinarKey,
-                                                     registration_data)
+        try:
+            registration_metadata = client.register_user(self.context.webinarKey,
+                                                         registration_data)
+        except WebinarRegistrationError as validation_error:
+            logger.info('Validation error during registration (%s) (%s)',
+                        self.remoteUser.username,
+                        validation_error.json)
+            raise_error({'message': _(u"Validation error during registration."),
+                         'code': 'WebinarRegistrationValidationError',
+                         'error_dict': validation_error.json},
+                        factory=hexc.HTTPUnprocessableEntity)
+        logger.info('Registered user for webinar (%s) (%s) (%s)',
+                    self.context.webinarKey,
+                    self.remoteUser,
+                    registration_metadata)
         container = IWebinarRegistrationMetadataContainer(self.context)
         if self.remoteUser.username not in container:
             container[self.remoteUser.username] = registration_metadata

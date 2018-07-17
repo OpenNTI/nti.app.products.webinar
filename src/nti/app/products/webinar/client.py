@@ -20,6 +20,7 @@ from nti.app.products.webinar.client_models import WebinarRegistrationMetadata
 from nti.app.products.webinar.interfaces import IWebinar
 from nti.app.products.webinar.interfaces import IWebinarClient
 from nti.app.products.webinar.interfaces import IWebinarCollection
+from nti.app.products.webinar.interfaces import WebinarRegistrationError
 from nti.app.products.webinar.interfaces import IWebinarRegistrationFields
 from nti.app.products.webinar.interfaces import IGoToWebinarAuthorizedIntegration
 
@@ -37,7 +38,7 @@ class GoToWebinarClient(object):
     The client to interact with making GOTO webinar API calls. This should
     live within a single request lifespan.
     """
-    GOTO_BASE_URL = 'https://api.getgo.com/G2W/rest/'
+    GOTO_BASE_URL = 'https://api.getgo.com/G2W/rest'
 
     WEBINAR_URL = '/organizers/%s/webinars/%s'
     UPCOMING_WEBINARS = '/organizers/%s/upcomingWebinars'
@@ -66,21 +67,22 @@ class GoToWebinarClient(object):
     def _make_call(self, url, post_data=None, acceptable_return_codes=None):
         if not acceptable_return_codes:
             acceptable_return_codes = (200,)
-        url = '%s/%s' % (self.GOTO_BASE_URL, url)
+        url = '%s%s' % (self.GOTO_BASE_URL, url)
         if self._access_token is None:
             self._get_access_token()
 
         def _do_make_call():
             access_header = 'Bearer %s' % self._access_token
             if post_data:
-                return requests.post(url, post_data,
-                                     headers={'Authorization': access_header})
+                return requests.post(url,
+                                     json=post_data,
+                                     headers={'Authorization': access_header,
+                                              'Accept': 'application/json'})
             else:
                 return requests.get(url,
                                     headers={'Authorization': access_header})
         response = _do_make_call()
         if response.status_code in (401, 403):
-            # FIXME: verify this status code on expired token
             # Ok, expired token, refresh and try again.
             self._update_access_token()
             response = _do_make_call()
@@ -116,18 +118,24 @@ class GoToWebinarClient(object):
         return result
 
     def register_user(self, webinar_key, registration_data):
-        url = self.WEBINAR_URL % (self.authorized_integration.organizer_key, webinar_key)
+        url = self.REGISTRANTS % (self.authorized_integration.organizer_key,
+                                  webinar_key)
         # 409 if user is already registered
         response = self._make_call(url,
                                    post_data=registration_data,
-                                   acceptable_return_codes=(200, 409))
+                                   acceptable_return_codes=(201, 400, 409))
+        if response.status_code == 400:
+            raise WebinarRegistrationError(response.json())
+
+        if response.status_code == 409:
+            logger.info('User already registered for webinar')
+
+        # We want to return a metadata object on 409 so we can store it if
+        # we have not already.
         data = response.json()
-        logger.info('Registered user for webinar (%s:%s) (%s) (%s)',
-                    self.authorized_integration.organizer_key,
-                    webinar_key,
-                    self.remoteUser,
-                    data)
-        return WebinarRegistrationMetadata(registrant_key=data.get('registrantKey'),
-                                           join_url=data.get('joinUrl'),
+        registrant_key = unicode(data.get('registrantKey'))
+        join_url = unicode(data.get('joinUrl'))
+        return WebinarRegistrationMetadata(registrant_key=registrant_key,
+                                           join_url=join_url,
                                            webinar_key=webinar_key,
                                            organizer_key=self.authorized_integration.organizer_key)

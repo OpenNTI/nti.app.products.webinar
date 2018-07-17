@@ -100,9 +100,9 @@ class _WebinarDecorator(AbstractAuthenticatedRequestAwareDecorator):
     def _do_decorate_external(self, context, result):
         links = result.setdefault(LINKS, [])
         if self.is_registered(context):
-            rels = (VIEW_WEBINAR_REGISTRATION_FIELDS, VIEW_WEBINAR_REGISTER)
-        else:
             rels = (VIEW_JOIN_WEBINAR,)
+        else:
+            rels = (VIEW_WEBINAR_REGISTRATION_FIELDS, VIEW_WEBINAR_REGISTER)
 
         for rel in rels:
             link = Link(context,

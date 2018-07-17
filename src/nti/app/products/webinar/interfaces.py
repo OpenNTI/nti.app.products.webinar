@@ -284,11 +284,11 @@ class IWebinarRegistrationMetadata(IContained, ICreated, ILastModified):
     registrant_key = ValidTextLine(title=u"The registrant key",
                                    required=True)
 
-    organizer_key = Number(title=u"Webinar organizer key",
-                          required=True)
+    organizer_key = ValidTextLine(title=u"Webinar organizer key",
+                                  required=True)
 
-    webinar_key = Number(title=u"Webinar key",
-                        required=True)
+    webinar_key = ValidTextLine(title=u"Webinar key",
+                                required=True)
 
     join_url = ValidTextLine(title=u"Webinar join url",
                              required=True)
@@ -300,3 +300,13 @@ class IWebinarRegistrationMetadataContainer(IContainer):
     """
     contains(IWebinarRegistrationMetadata)
 
+
+class WebinarClientError(Exception):
+
+    def __init__(self, msg, json=None):
+        Exception.__init__(self, msg)
+        self.json = json
+
+
+class WebinarRegistrationError(WebinarClientError):
+    pass
