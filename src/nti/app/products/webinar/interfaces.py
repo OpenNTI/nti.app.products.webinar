@@ -12,17 +12,30 @@ from __future__ import absolute_import
 
 from zope import interface
 
+from zope.container.constraints import contains
+
+from zope.container.interfaces import IContained
+from zope.container.interfaces import IContainer
+
 from nti.app.products.integration.interfaces import IIntegration
 from nti.app.products.integration.interfaces import IOAuthAuthorizedIntegration
+
+from nti.base.interfaces import ICreated
+from nti.base.interfaces import ILastModified
+
+from nti.contenttypes.courses.interfaces import ICourseInstance
 
 from nti.contenttypes.presentation.interfaces import IUserCreatedAsset
 from nti.contenttypes.presentation.interfaces import IGroupOverViewable
 from nti.contenttypes.presentation.interfaces import ICoursePresentationAsset
 
+from nti.coremetadata.interfaces import IUser
+
 from nti.schema.field import Int
 from nti.schema.field import Bool
 from nti.schema.field import Number
 from nti.schema.field import Object
+from nti.schema.field import DateTime
 from nti.schema.field import ValidText
 from nti.schema.field import ListOrTuple
 from nti.schema.field import ValidDatetime
@@ -230,3 +243,70 @@ class IWebinarRegistrationFields(interface.Interface):
                             title=u"Webinar questions",
                             required=False,
                             min_length=0)
+
+
+class IJoinWebinarEvent(interface.Interface):
+    """
+    An event that is sent when an LTI asset is launched
+    """
+
+    user = Object(IUser,
+                  title=u'The user who joined the webinar',
+                  required=True)
+
+    course = Object(ICourseInstance,
+                    title=u'The webinar course',
+                    required=True)
+
+    webinar = Object(IWebinar,
+                   title=u'The webinar that was join.',
+                   required=True)
+
+    timestamp = DateTime(title=u'The time at which the webinar was joined',
+                         required=True)
+
+
+@interface.implementer(IJoinWebinarEvent)
+class JoinWebinarEvent(object):
+
+    def __init__(self, user, course, webinar, timestamp):
+        self.user = user
+        self.course = course
+        self.webinar = webinar
+        self.timestamp = timestamp
+
+
+class IWebinarRegistrationMetadata(IContained, ICreated, ILastModified):
+    """
+    A metadata user webinar registration object.
+    """
+
+    registrant_key = ValidTextLine(title=u"The registrant key",
+                                   required=True)
+
+    organizer_key = ValidTextLine(title=u"Webinar organizer key",
+                                  required=True)
+
+    webinar_key = ValidTextLine(title=u"Webinar key",
+                                required=True)
+
+    join_url = ValidTextLine(title=u"Webinar join url",
+                             required=True)
+
+
+class IWebinarRegistrationMetadataContainer(IContainer):
+    """
+    A storage container for :class:`IWebinarRegistration` objects.
+    """
+    contains(IWebinarRegistrationMetadata)
+
+
+class WebinarClientError(Exception):
+
+    def __init__(self, msg, json=None):
+        Exception.__init__(self, msg)
+        self.json = json
+
+
+class WebinarRegistrationError(WebinarClientError):
+    pass

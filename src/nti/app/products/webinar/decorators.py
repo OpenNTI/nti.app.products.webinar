@@ -16,13 +16,16 @@ from zope import interface
 from zope.location.interfaces import ILocation
 
 from nti.app.products.webinar import REL_AUTH_WEBINAR
+from nti.app.products.webinar import VIEW_JOIN_WEBINAR
 from nti.app.products.webinar import VIEW_RESOLVE_WEBINAR
+from nti.app.products.webinar import VIEW_WEBINAR_REGISTER
 from nti.app.products.webinar import VIEW_UPCOMING_WEBINARS
 from nti.app.products.webinar import VIEW_WEBINAR_REGISTRATION_FIELDS
 
 from nti.app.products.webinar.interfaces import IWebinar
 from nti.app.products.webinar.interfaces import IWebinarIntegration
 from nti.app.products.webinar.interfaces import IWebinarAuthorizedIntegration
+from nti.app.products.webinar.interfaces import IWebinarRegistrationMetadataContainer
 
 from nti.app.renderers.decorators import AbstractAuthenticatedRequestAwareDecorator
 
@@ -90,9 +93,18 @@ class _WebinarDecorator(AbstractAuthenticatedRequestAwareDecorator):
         return super(_WebinarDecorator, self)._predicate(context, unused_result) \
            and has_permission(ACT_READ, context, self.request)
 
+    def is_registered(self, webinar):
+        reg_container = IWebinarRegistrationMetadataContainer(webinar)
+        return self.remoteUser.username in reg_container
+
     def _do_decorate_external(self, context, result):
         links = result.setdefault(LINKS, [])
-        for rel in (VIEW_WEBINAR_REGISTRATION_FIELDS,):
+        if self.is_registered(context):
+            rels = (VIEW_JOIN_WEBINAR,)
+        else:
+            rels = (VIEW_WEBINAR_REGISTRATION_FIELDS, VIEW_WEBINAR_REGISTER)
+
+        for rel in rels:
             link = Link(context,
                         rel=rel,
                         elements=('@@%s' % rel,))

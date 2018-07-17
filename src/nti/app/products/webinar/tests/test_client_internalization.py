@@ -78,7 +78,6 @@ class TestWebinarClientInternalization(unittest.TestCase):
         assert_that(webinar.webinarID, is_('web_id'))
         assert_that(webinar.webinarKey, is_("222222222222"))
 
-
         collection_ext = to_external_object(collection)
         assert_that(collection_ext['webinars'], has_length(1))
         assert_that(collection_ext['webinars'][0]['times'], has_length(1))
