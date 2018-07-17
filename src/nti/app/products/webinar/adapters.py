@@ -23,13 +23,9 @@ from nti.app.products.webinar.interfaces import IWebinarRegistrationMetadataCont
 
 from nti.containers.containers import CaseInsensitiveCheckingLastModifiedBTreeContainer
 
-from nti.contenttypes.courses.interfaces import ICourseInstance
-
 from nti.schema.fieldproperty import createDirectFieldProperties
 
 from nti.schema.schema import SchemaConfigured
-
-from nti.traversal.traversal import find_interface
 
 
 WEBINAR_REGISTRATION_CONTAINER_KEY = 'nti.app.products.webinar.interfaces.IWebinarRegistrationContainer'
@@ -78,7 +74,3 @@ def WebinarRegistrationMetadataContainerFactory(webinar):
         result.__parent__ = webinar
         IConnection(webinar).add(result)
     return result
-
-
-def webinar_to_course(webinar):
-    return find_interface(webinar, ICourseInstance)

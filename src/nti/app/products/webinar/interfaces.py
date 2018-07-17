@@ -23,8 +23,6 @@ from nti.app.products.integration.interfaces import IOAuthAuthorizedIntegration
 from nti.base.interfaces import ICreated
 from nti.base.interfaces import ILastModified
 
-from nti.contenttypes.courses.interfaces import ICourseInstance
-
 from nti.contenttypes.presentation.interfaces import IUserCreatedAsset
 from nti.contenttypes.presentation.interfaces import IGroupOverViewable
 from nti.contenttypes.presentation.interfaces import ICoursePresentationAsset
@@ -254,10 +252,6 @@ class IJoinWebinarEvent(interface.Interface):
                   title=u'The user who joined the webinar',
                   required=True)
 
-    course = Object(ICourseInstance,
-                    title=u'The webinar course',
-                    required=True)
-
     webinar = Object(IWebinar,
                    title=u'The webinar that was join.',
                    required=True)
@@ -269,9 +263,8 @@ class IJoinWebinarEvent(interface.Interface):
 @interface.implementer(IJoinWebinarEvent)
 class JoinWebinarEvent(object):
 
-    def __init__(self, user, course, webinar, timestamp):
+    def __init__(self, user, webinar, timestamp):
         self.user = user
-        self.course = course
         self.webinar = webinar
         self.timestamp = timestamp
 
@@ -309,4 +302,8 @@ class WebinarClientError(Exception):
 
 
 class WebinarRegistrationError(WebinarClientError):
-    pass
+
+    msg = 'Error during webinar registration.'
+
+    def __init__(self, json=None):
+        super(WebinarRegistrationError, self).__init__(self.msg, json)

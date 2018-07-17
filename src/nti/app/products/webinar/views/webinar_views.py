@@ -42,8 +42,6 @@ from nti.app.products.webinar.interfaces import IWebinarRegistrationMetadataCont
 
 from nti.app.products.webinar.utils import raise_error
 
-from nti.contenttypes.courses.interfaces import ICourseInstance
-
 from nti.dataserver.authorization import ACT_READ
 from nti.dataserver.authorization import ACT_CONTENT_EDIT
 
@@ -200,7 +198,7 @@ class WebinarRegisterView(AbstractAuthenticatedView,
         container = IWebinarRegistrationMetadataContainer(self.context)
         if self.remoteUser.username not in container:
             container[self.remoteUser.username] = registration_metadata
-        return registration_metadata
+        return container[self.remoteUser.username]
 
 
 @view_config(route_name='objects.generic.traversal',
@@ -222,9 +220,7 @@ class JoinWebinarView(AbstractAuthenticatedView):
                          'code': 'WebinarRegistrationNotFoundError'},
                         factory=hexc.HTTPNotFound)
         registration_metadata = container[self.remoteUser.username]
-        course = ICourseInstance(self.context)
         notify(JoinWebinarEvent(user=self.remoteUser,
-                                course=course,
                                 webinar=self.context,
                                 timestamp=datetime.utcnow()))
         self.request.environ['nti.request_had_transaction_side_effects'] = 'True'

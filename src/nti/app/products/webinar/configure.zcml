@@ -29,10 +29,6 @@
              provides=".interfaces.IWebinarRegistrationMetadataContainer"
              for=".interfaces.IWebinar" />
 
-    <adapter factory=".adapters.webinar_to_course"
-             provides="nti.contenttypes.courses.interfaces.ICourseInstance"
-             for=".interfaces.IWebinar" />
-
     <!-- Decorators -->
     <subscriber factory=".decorators._WebinarAuthorizeDecorator"
                 provides="nti.externalization.interfaces.IExternalMappingDecorator"
