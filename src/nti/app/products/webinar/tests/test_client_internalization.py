@@ -39,8 +39,8 @@ webinar_json = {
           "description": u"desc",
           "subject": u"subject",
           "inSession": True,
-          "organizerKey": 0,
-          "webinarKey": 0,
+          "organizerKey": 111111111111,
+          "webinarKey": 222222222222,
           "webinarID": u"web_id",
           "timeZone": u"tz",
           "registrationUrl": u"reg_url",
@@ -73,10 +73,10 @@ class TestWebinarClientInternalization(unittest.TestCase):
         assert_that(webinar.numberOfRegistrants, is_(0))
         assert_that(webinar.timeZone, is_('tz'))
         assert_that(webinar.subject, is_('subject'))
-        assert_that(webinar.organizerKey, is_(0))
+        assert_that(webinar.organizerKey, is_("111111111111"))
         assert_that(webinar.registrationUrl, is_('reg_url'))
         assert_that(webinar.webinarID, is_('web_id'))
-        assert_that(webinar.webinarKey, is_(0))
+        assert_that(webinar.webinarKey, is_("222222222222"))
 
 
         collection_ext = to_external_object(collection)

@@ -44,8 +44,8 @@ webinar_asset_json = {
               "description": u"desc",
               "subject": u"subject",
               "inSession": True,
-              "organizerKey": 0,
-              "webinarKey": 0,
+              "organizerKey": "13431343",
+              "webinarKey": "11111111",
               "webinarID": u"web_id",
               "timeZone": u"tz",
               "registrationUrl": u"reg_url",}
