@@ -43,7 +43,7 @@ webinar_json = {
           "webinarKey": 222222222222,
           "webinarID": u"web_id",
           "timeZone": u"tz",
-          "registrationUrl": u"reg_url",
+          "registrationUrl": u"http://reg_url",
 }
 
 
@@ -74,7 +74,7 @@ class TestWebinarClientInternalization(unittest.TestCase):
         assert_that(webinar.timeZone, is_('tz'))
         assert_that(webinar.subject, is_('subject'))
         assert_that(webinar.organizerKey, is_("111111111111"))
-        assert_that(webinar.registrationUrl, is_('reg_url'))
+        assert_that(webinar.registrationUrl, is_('http://reg_url'))
         assert_that(webinar.webinarID, is_('web_id'))
         assert_that(webinar.webinarKey, is_("222222222222"))
 

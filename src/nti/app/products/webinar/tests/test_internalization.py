@@ -48,7 +48,7 @@ webinar_asset_json = {
               "webinarKey": "11111111",
               "webinarID": u"web_id",
               "timeZone": u"tz",
-              "registrationUrl": u"reg_url",}
+              "registrationUrl": u"http://reg_url",}
 }
 
 
