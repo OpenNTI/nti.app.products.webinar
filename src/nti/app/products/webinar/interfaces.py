@@ -23,8 +23,12 @@ from nti.app.products.integration.interfaces import IOAuthAuthorizedIntegration
 from nti.base.interfaces import ICreated
 from nti.base.interfaces import ILastModified
 
+from nti.contenttypes.completion.interfaces import ICompletableItem
+
 from nti.contenttypes.presentation.interfaces import IUserCreatedAsset
 from nti.contenttypes.presentation.interfaces import IGroupOverViewable
+from nti.contenttypes.presentation.interfaces import INTIIDIdentifiable
+from nti.contenttypes.presentation.interfaces import INonExportableAsset
 from nti.contenttypes.presentation.interfaces import ICoursePresentationAsset
 
 from nti.coremetadata.interfaces import IUser
@@ -33,6 +37,7 @@ from nti.schema.field import Int
 from nti.schema.field import Bool
 from nti.schema.field import Number
 from nti.schema.field import Object
+from nti.schema.field import HTTPURL
 from nti.schema.field import DateTime
 from nti.schema.field import ValidText
 from nti.schema.field import ListOrTuple
@@ -149,8 +154,8 @@ class IWebinar(interface.Interface):
     timeZone = ValidTextLine(title=u"Webinar timeZone",
                              required=True)
 
-    registrationUrl = ValidTextLine(title=u"Webinar registrationUrl",
-                                    required=True)
+    registrationUrl = HTTPURL(title=u"Webinar registrationUrl",
+                              required=True)
 
     webinarID = ValidTextLine(title=u"Webinar webinarID",
                               required=True)
@@ -174,9 +179,13 @@ class IWebinarCollection(interface.Interface):
 
 class IWebinarAsset(ICoursePresentationAsset,
                     IUserCreatedAsset,
-                    IGroupOverViewable):
+                    IGroupOverViewable,
+                    INTIIDIdentifiable,
+                    INonExportableAsset,
+                    ICompletableItem):
     """
-    A presentation asset for webinars.
+    A presentation asset for webinars. These assets, since they are temporal,
+    should not be exported or imported.
     """
 
     title = ValidTextLine(title=u"The webinar asset title",
@@ -283,8 +292,8 @@ class IWebinarRegistrationMetadata(IContained, ICreated, ILastModified):
     webinar_key = ValidTextLine(title=u"Webinar key",
                                 required=True)
 
-    join_url = ValidTextLine(title=u"Webinar join url",
-                             required=True)
+    join_url = HTTPURL(title=u"Webinar join url",
+                       required=True)
 
 
 class IWebinarRegistrationMetadataContainer(IContainer):

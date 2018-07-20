@@ -16,8 +16,6 @@ from nti.app.products.webinar.interfaces import IWebinarAsset
 
 from nti.contenttypes.presentation.mixins import PersistentPresentationAsset
 
-from nti.ntiids.oids import to_external_ntiid_oid
-
 from nti.property.property import alias
 
 from nti.schema.fieldproperty import createDirectFieldProperties
@@ -36,6 +34,9 @@ class WebinarAsset(PersistentPresentationAsset):
     desc = alias('description')
     __name__ = alias('ntiid')
 
+    nttype = u'NTIWebinarAsset'
+
     @readproperty
-    def ntiid(self):
-        return to_external_ntiid_oid(self)
+    def ntiid(self):  # pylint: disable=method-hidden
+        self.ntiid = self.generate_ntiid(self.nttype)
+        return self.ntiid
