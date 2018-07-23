@@ -60,7 +60,6 @@ setup(
         'pyramid',
         'six',
         'nti.app.products.integration',
-        'nti.contenttypes.presentation',
         'zope.component',
         'zope.i18nmessageid',
         'zope.interface',

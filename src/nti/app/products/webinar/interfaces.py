@@ -23,14 +23,6 @@ from nti.app.products.integration.interfaces import IOAuthAuthorizedIntegration
 from nti.base.interfaces import ICreated
 from nti.base.interfaces import ILastModified
 
-from nti.contenttypes.completion.interfaces import ICompletableItem
-
-from nti.contenttypes.presentation.interfaces import IUserCreatedAsset
-from nti.contenttypes.presentation.interfaces import IGroupOverViewable
-from nti.contenttypes.presentation.interfaces import INTIIDIdentifiable
-from nti.contenttypes.presentation.interfaces import INonExportableAsset
-from nti.contenttypes.presentation.interfaces import ICoursePresentationAsset
-
 from nti.coremetadata.interfaces import IUser
 
 from nti.schema.field import Int
@@ -177,26 +169,6 @@ class IWebinarCollection(interface.Interface):
                            min_length=0)
 
 
-class IWebinarAsset(ICoursePresentationAsset,
-                    IUserCreatedAsset,
-                    IGroupOverViewable,
-                    INTIIDIdentifiable,
-                    INonExportableAsset,
-                    ICompletableItem):
-    """
-    A presentation asset for webinars. These assets, since they are temporal,
-    should not be exported or imported.
-    """
-
-    title = ValidTextLine(title=u"The webinar asset title",
-                          required=False)
-
-    description = ValidTextLine(title=u"The webinar asset description",
-                                required=False)
-
-    webinar = Object(IWebinar, required=True)
-
-
 class IWebinarField(interface.Interface):
     """
     A webinar registration field.
@@ -316,3 +288,12 @@ class WebinarRegistrationError(WebinarClientError):
 
     def __init__(self, json=None):
         super(WebinarRegistrationError, self).__init__(self.msg, json)
+
+
+import zope.deferredimport
+zope.deferredimport.initialize()
+
+zope.deferredimport.deprecatedFrom(
+    "Moved to nti.app.products.courseware.webinars.interfaces",
+    "nti.app.products.courseware.webinars.interfaces",
+    "IWebinarAsset")
