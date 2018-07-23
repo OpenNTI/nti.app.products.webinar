@@ -8,35 +8,10 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import absolute_import
 
-from zope import interface
+import zope.deferredimport
+zope.deferredimport.initialize()
 
-from zope.cachedescriptors.property import readproperty
-
-from nti.app.products.webinar.interfaces import IWebinarAsset
-
-from nti.contenttypes.presentation.mixins import PersistentPresentationAsset
-
-from nti.property.property import alias
-
-from nti.schema.fieldproperty import createDirectFieldProperties
-
-logger = __import__('logging').getLogger(__name__)
-
-
-@interface.implementer(IWebinarAsset)
-class WebinarAsset(PersistentPresentationAsset):
-
-    createDirectFieldProperties(IWebinarAsset)
-    mimeType = mime_type = 'application/vnd.nextthought.webinarasset'
-    __external_class_name__ = "WebinarAsset"
-
-    Creator = alias('creator')
-    desc = alias('description')
-    __name__ = alias('ntiid')
-
-    nttype = u'NTIWebinarAsset'
-
-    @readproperty
-    def ntiid(self):  # pylint: disable=method-hidden
-        self.ntiid = self.generate_ntiid(self.nttype)
-        return self.ntiid
+zope.deferredimport.deprecatedFrom(
+    "Moved to nti.app.products.courseware.webinars.assets",
+    "nti.app.products.courseware.webinars.assets",
+    "WebinarAsset")

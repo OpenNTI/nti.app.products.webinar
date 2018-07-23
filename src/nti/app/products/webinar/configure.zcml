@@ -52,7 +52,6 @@
     <ext:registerAutoPackageIO
         root_interfaces=".interfaces.IWebinar
                          .interfaces.IWebinarField
-                         .interfaces.IWebinarAsset
                          .interfaces.IWebinarSession
                          .interfaces.IWebinarQuestion
                          .interfaces.IWebinarCollection
@@ -61,7 +60,7 @@
                          .interfaces.IWebinarRegistrationMetadata
                          .interfaces.IWebinarAuthorizedIntegration
                          .interfaces.IGoToWebinarAuthorizedIntegration"
-        modules=".integration .assets .client_models" />
+        modules=".integration .client_models" />
 
     <!-- Internalization -->
     <adapter factory=".client_models._webinar_field_factory"
@@ -92,12 +91,13 @@
              for="list"
              provides=".interfaces.IWebinarCollection" />
 
-    <adapter factory=".internalization._WebinarAssetUpdater"
-             provides="nti.externalization.interfaces.IInternalObjectUpdater"
-             for=".interfaces.IWebinarAsset" />
-
     <!-- Integration -->
     <utility factory=".integration.WebinarIntegrationProvider" />
+
+    <!-- Weak refs -->
+    <adapter factory="nti.intid.wref.NoCachingArbitraryOrderableWeakRef"
+             provides="nti.wref.interfaces.IWeakRef"
+             for="nti.app.products.webinar.interfaces.IWebinar" />
 
     <!-- Webinar auth (localhost)-->
     <include package="nti.common" file="meta.zcml" />

@@ -134,7 +134,7 @@ class GoToWebinarClient(object):
         # we have not already.
         data = response.json()
         registrant_key = unicode(data.get('registrantKey'))
-        join_url = unicode(data.get('joinUrl'))
+        join_url = data.get('joinUrl')
         return WebinarRegistrationMetadata(registrant_key=registrant_key,
                                            join_url=join_url,
                                            webinar_key=webinar_key,

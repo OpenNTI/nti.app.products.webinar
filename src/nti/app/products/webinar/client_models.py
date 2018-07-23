@@ -29,6 +29,8 @@ from nti.ntiids.oids import to_external_ntiid_oid
 
 from nti.property.property import alias
 
+from nti.schema.eqhash import EqHash
+
 from nti.schema.fieldproperty import createDirectFieldProperties
 
 from nti.schema.schema import SchemaConfigured
@@ -125,6 +127,7 @@ class WebinarSession(PersistentCreatedAndModifiedTimeObject,
     mimeType = mime_type = "application/vnd.nextthought.webinarsession"
 
 
+@EqHash('webinarKey')
 @interface.implementer(IWebinar, IAttributeAnnotatable)
 class Webinar(PersistentCreatedAndModifiedTimeObject,
               SchemaConfigured):
