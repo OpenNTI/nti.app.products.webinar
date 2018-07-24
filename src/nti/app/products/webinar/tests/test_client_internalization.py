@@ -26,6 +26,7 @@ from nti.app.products.webinar.interfaces import IWebinarField
 from nti.app.products.webinar.interfaces import IWebinarSession
 from nti.app.products.webinar.interfaces import IWebinarQuestion
 from nti.app.products.webinar.interfaces import IWebinarCollection
+from nti.app.products.webinar.interfaces import IWebinarQuestionAnswer
 from nti.app.products.webinar.interfaces import IWebinarRegistrationMetadata
 from nti.app.products.webinar.interfaces import IWebinarRegistrationFields
 
@@ -96,13 +97,18 @@ class TestWebinarClientInternalization(unittest.TestCase):
         fields = IWebinarRegistrationFields(registration_data)
         assert_that(fields, verifiably_provides(IWebinarRegistrationFields))
         assert_that(fields.fields, has_length(16))
-        assert_that(fields.questions, has_length(3))
+        assert_that(fields.questions, has_length(4))
 
         for field in fields.fields:
             assert_that(field, verifiably_provides(IWebinarField))
 
         for question in fields.questions:
             assert_that(question, verifiably_provides(IWebinarQuestion))
+            if question.type == 'multipleChoice':
+                assert_that(question.answers, has_length(2))
+                for question_answer in question.answers:
+                    assert_that(question_answer,
+                                verifiably_provides(IWebinarQuestionAnswer))
 
     def test_webinar_registration_metadata(self):
         metadata = IWebinarRegistrationMetadata(metadata_json)

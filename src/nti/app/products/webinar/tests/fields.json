@@ -434,6 +434,23 @@
       "required": true,
       "question": "What questions do you have for the speaker?",
       "maxSize": 128
+    },
+    {
+      "questionKey": 95607887,
+      "question": "string",
+      "required": true,
+      "type": "multipleChoice",
+      "maxSize": 0,
+      "answers": [
+        {
+          "answer": "answer1",
+          "answerKey": 0
+        },
+        {
+          "answer": "answer2",
+          "answerKey": 1
+        }
+      ]
     }
   ]
 }

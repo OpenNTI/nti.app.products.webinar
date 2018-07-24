@@ -189,6 +189,18 @@ class IWebinarField(interface.Interface):
                           value_type=ValidTextLine(title=u"The answer"))
 
 
+class IWebinarQuestionAnswer(interface.Interface):
+    """
+    A webinar registration question answer, for multiple choice.
+    """
+
+    answerKey = Int(title=u"The answer key",
+                    required=True)
+
+    answer = ValidTextLine(title=u"The answer",
+                           required=True)
+
+
 class IWebinarQuestion(interface.Interface):
     """
     A webinar registration question.
@@ -207,6 +219,11 @@ class IWebinarQuestion(interface.Interface):
 
     question = ValidTextLine(title=u"The question",
                              required=True)
+
+    answers = ListOrTuple(Object(IWebinarQuestionAnswer),
+                          title=u"Webinar question answers",
+                          required=False,
+                          min_length=0)
 
 
 class IWebinarRegistrationFields(interface.Interface):
