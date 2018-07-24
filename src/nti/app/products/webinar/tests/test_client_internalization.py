@@ -26,6 +26,7 @@ from nti.app.products.webinar.interfaces import IWebinarField
 from nti.app.products.webinar.interfaces import IWebinarSession
 from nti.app.products.webinar.interfaces import IWebinarQuestion
 from nti.app.products.webinar.interfaces import IWebinarCollection
+from nti.app.products.webinar.interfaces import IWebinarRegistrationMetadata
 from nti.app.products.webinar.interfaces import IWebinarRegistrationFields
 
 webinar_json = {
@@ -44,6 +45,14 @@ webinar_json = {
           "webinarID": u"web_id",
           "timeZone": u"tz",
           "registrationUrl": u"http://reg_url",
+}
+
+metadata_json = {
+          "organizer_key": u"111111111111",
+          "webinar_key": u"222222222222",
+          "registrant_key": u"reg_key",
+          "join_url": u"http://reg_url",
+          "creator": "creator"
 }
 
 
@@ -94,3 +103,11 @@ class TestWebinarClientInternalization(unittest.TestCase):
 
         for question in fields.questions:
             assert_that(question, verifiably_provides(IWebinarQuestion))
+
+    def test_webinar_registration_metadata(self):
+        metadata = IWebinarRegistrationMetadata(metadata_json)
+        assert_that(metadata, verifiably_provides(IWebinarRegistrationMetadata))
+        assert_that(metadata.organizer_key, is_("111111111111"))
+        assert_that(metadata.join_url, is_('http://reg_url'))
+        assert_that(metadata.registrant_key, is_('reg_key'))
+        assert_that(metadata.webinar_key, is_("222222222222"))

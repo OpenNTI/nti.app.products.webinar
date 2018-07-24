@@ -24,6 +24,7 @@ from nti.base.interfaces import ICreated
 from nti.base.interfaces import ILastModified
 
 from nti.coremetadata.interfaces import IUser
+from nti.coremetadata.interfaces import IShouldHaveTraversablePath
 
 from nti.schema.field import Int
 from nti.schema.field import Bool
@@ -126,7 +127,7 @@ class IWebinarSession(interface.Interface):
                             required=True)
 
 
-class IWebinar(interface.Interface):
+class IWebinar(IShouldHaveTraversablePath):
 
     description = ValidText(title=u"Webinar description",
                             required=True)

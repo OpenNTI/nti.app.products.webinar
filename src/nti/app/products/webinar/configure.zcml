@@ -83,6 +83,10 @@
              for="dict"
              provides=".interfaces.IWebinar" />
 
+    <adapter factory=".client_models._webinar_registration_metadata_factory"
+             for="dict"
+             provides=".interfaces.IWebinarRegistrationMetadata" />
+
     <adapter factory=".client_models._webinar_session_factory"
              for="dict"
              provides=".interfaces.IWebinarSession" />

@@ -15,13 +15,12 @@ from pyramid.interfaces import IRequest
 from zope import component
 from zope import interface
 
-from nti.app.products.webinar.client_models import WebinarRegistrationMetadata
-
 from nti.app.products.webinar.interfaces import IWebinar
 from nti.app.products.webinar.interfaces import IWebinarClient
 from nti.app.products.webinar.interfaces import IWebinarCollection
 from nti.app.products.webinar.interfaces import WebinarRegistrationError
 from nti.app.products.webinar.interfaces import IWebinarRegistrationFields
+from nti.app.products.webinar.interfaces import IWebinarRegistrationMetadata
 from nti.app.products.webinar.interfaces import IGoToWebinarAuthorizedIntegration
 
 from nti.app.products.webinar import MessageFactory as _
@@ -133,9 +132,10 @@ class GoToWebinarClient(object):
         # We want to return a metadata object on 409 so we can store it if
         # we have not already.
         data = response.json()
-        registrant_key = unicode(data.get('registrantKey'))
-        join_url = data.get('joinUrl')
-        return WebinarRegistrationMetadata(registrant_key=registrant_key,
-                                           join_url=join_url,
-                                           webinar_key=webinar_key,
-                                           organizer_key=self.authorized_integration.organizer_key)
+        creator = getattr(self.request.remoteUser, 'username', '')
+        data = {'join_url': data.get('joinUrl'),
+                'registrant_key': data.get('registrantKey'),
+                'webinar_key': webinar_key,
+                'organizer_key': self.authorized_integration.organizer_key,
+                'creator': creator}
+        return IWebinarRegistrationMetadata(data)
