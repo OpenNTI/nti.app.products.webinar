@@ -18,6 +18,7 @@ from nti.app.products.webinar.interfaces import IWebinarField
 from nti.app.products.webinar.interfaces import IWebinarSession
 from nti.app.products.webinar.interfaces import IWebinarQuestion
 from nti.app.products.webinar.interfaces import IWebinarCollection
+from nti.app.products.webinar.interfaces import IWebinarQuestionAnswer
 from nti.app.products.webinar.interfaces import IWebinarRegistrationFields
 from nti.app.products.webinar.interfaces import IWebinarRegistrationMetadata
 
@@ -50,6 +51,16 @@ def _webinar_field_factory(ext):
 @interface.implementer(IWebinarQuestion)
 def _webinar_question_factory(ext):
     obj = WebinarQuestion()
+    if 'answers' in ext:
+        ext['answers'] = [IWebinarQuestionAnswer(x) for x in ext['answers'] or ()]
+    update_from_external_object(obj, ext)
+    return obj
+
+
+@component.adapter(dict)
+@interface.implementer(IWebinarQuestionAnswer)
+def _webinar_question_answer_factory(ext):
+    obj = WebinarQuestionAnswer()
     update_from_external_object(obj, ext)
     return obj
 
@@ -108,6 +119,14 @@ class WebinarField(SchemaConfigured):
     createDirectFieldProperties(IWebinarField)
 
     mimeType = mime_type = "application/vnd.nextthought.webinarfield"
+
+
+@interface.implementer(IWebinarQuestionAnswer)
+class WebinarQuestionAnswer(SchemaConfigured):
+
+    createDirectFieldProperties(IWebinarQuestionAnswer)
+
+    mimeType = mime_type = "application/vnd.nextthought.webinarquestionanswer"
 
 
 @interface.implementer(IWebinarQuestion)
