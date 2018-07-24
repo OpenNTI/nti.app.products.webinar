@@ -133,8 +133,9 @@ class GoToWebinarClient(object):
         # we have not already.
         data = response.json()
         creator = user.username
+        registrant_key = unicode(data.get('registrantKey'))
         data = {'join_url': data.get('joinUrl'),
-                'registrant_key': data.get('registrantKey'),
+                'registrant_key': registrant_key,
                 'webinar_key': webinar_key,
                 'organizer_key': self.authorized_integration.organizer_key,
                 'creator': creator}
