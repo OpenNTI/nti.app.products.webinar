@@ -116,7 +116,7 @@ class GoToWebinarClient(object):
             result = IWebinarRegistrationFields(get_response.json())
         return result
 
-    def register_user(self, webinar_key, registration_data):
+    def register_user(self, user, webinar_key, registration_data):
         url = self.REGISTRANTS % (self.authorized_integration.organizer_key,
                                   webinar_key)
         # 409 if user is already registered
@@ -132,7 +132,7 @@ class GoToWebinarClient(object):
         # We want to return a metadata object on 409 so we can store it if
         # we have not already.
         data = response.json()
-        creator = getattr(self.request.remoteUser, 'username', '')
+        creator = user.username
         data = {'join_url': data.get('joinUrl'),
                 'registrant_key': data.get('registrantKey'),
                 'webinar_key': webinar_key,

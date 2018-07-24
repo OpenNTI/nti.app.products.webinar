@@ -181,7 +181,8 @@ class WebinarRegisterView(AbstractAuthenticatedView,
         client = component.queryMultiAdapter((self.context, self.request),
                                              IWebinarClient)
         try:
-            registration_metadata = client.register_user(self.context.webinarKey,
+            registration_metadata = client.register_user(self.remoteUser,
+                                                         self.context.webinarKey,
                                                          registration_data)
         except WebinarRegistrationError as validation_error:
             logger.info('Validation error during registration (%s) (%s)',
