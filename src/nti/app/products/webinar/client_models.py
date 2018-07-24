@@ -94,6 +94,14 @@ def _webinar_collection_factory(ext):
     return obj
 
 
+@component.adapter(dict)
+@interface.implementer(IWebinarRegistrationMetadata)
+def _webinar_registration_metadata_factory(ext):
+    obj = WebinarRegistrationMetadata()
+    update_from_external_object(obj, ext)
+    return obj
+
+
 @interface.implementer(IWebinarField)
 class WebinarField(SchemaConfigured):
 
@@ -169,6 +177,7 @@ class WebinarRegistrationMetadata(PersistentCreatedAndModifiedTimeObject,
     mimeType = mime_type = "application/vnd.nextthought.webinarregistrationmetadata"
 
     __parent__ = None
+    creator = None
 
     @property
     def ntiid(self):
