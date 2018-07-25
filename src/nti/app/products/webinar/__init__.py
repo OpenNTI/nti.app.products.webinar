@@ -18,5 +18,6 @@ VIEW_JOIN_WEBINAR = 'JoinWebinar'
 VIEW_RESOLVE_WEBINAR = 'ResolveWebinar'
 VIEW_WEBINAR_REGISTER = 'WebinarRegister'
 VIEW_UPCOMING_WEBINARS = 'UpcomingWebinars'
+VIEW_WEBINAR_UNREGISTER = 'WebinarUnRegister'
 
 VIEW_WEBINAR_REGISTRATION_FIELDS = 'WebinarRegistrationFields'

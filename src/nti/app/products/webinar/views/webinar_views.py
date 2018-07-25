@@ -28,6 +28,7 @@ from nti.app.products.webinar import VIEW_JOIN_WEBINAR
 from nti.app.products.webinar import VIEW_RESOLVE_WEBINAR
 from nti.app.products.webinar import VIEW_WEBINAR_REGISTER
 from nti.app.products.webinar import VIEW_UPCOMING_WEBINARS
+from nti.app.products.webinar import VIEW_WEBINAR_UNREGISTER
 from nti.app.products.webinar import VIEW_WEBINAR_REGISTRATION_FIELDS
 
 from nti.app.products.webinar import MessageFactory as _
@@ -200,6 +201,34 @@ class WebinarRegisterView(AbstractAuthenticatedView,
         if self.remoteUser.username not in container:
             container[self.remoteUser.username] = registration_metadata
         return container[self.remoteUser.username]
+
+
+@view_config(route_name='objects.generic.traversal',
+             context=IWebinar,
+             request_method='DELETE',
+             name=VIEW_WEBINAR_UNREGISTER,
+             permission=ACT_READ,
+             renderer='rest')
+class WebinarUnRegisterView(AbstractAuthenticatedView):
+    """
+    Allows the user to unregister for the contextual
+    :class:`IWebinar` object.
+    """
+
+    def __call__(self):
+        client = component.queryMultiAdapter((self.context, self.request),
+                                             IWebinarClient)
+        container = IWebinarRegistrationMetadataContainer(self.context)
+        username = self.remoteUser.username
+        if username in container:
+            registration_metadata = container[username]
+            did_unregister = client.unregister_user(self.context.webinarKey,
+                                                    registration_metadata.registrant_key)
+            if did_unregister:
+                logger.info('Unregistered user from webinar (%s) (%s)',
+                            username,
+                            self.context.webinarKey)
+        return hexc.HTTPNoContent()
 
 
 @view_config(route_name='objects.generic.traversal',

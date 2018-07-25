@@ -20,6 +20,7 @@ from nti.app.products.webinar import VIEW_JOIN_WEBINAR
 from nti.app.products.webinar import VIEW_RESOLVE_WEBINAR
 from nti.app.products.webinar import VIEW_WEBINAR_REGISTER
 from nti.app.products.webinar import VIEW_UPCOMING_WEBINARS
+from nti.app.products.webinar import VIEW_WEBINAR_UNREGISTER
 from nti.app.products.webinar import VIEW_WEBINAR_REGISTRATION_FIELDS
 
 from nti.app.products.webinar.interfaces import IWebinar
@@ -100,7 +101,7 @@ class _WebinarDecorator(AbstractAuthenticatedRequestAwareDecorator):
     def _do_decorate_external(self, context, result):
         links = result.setdefault(LINKS, [])
         if self.is_registered(context):
-            rels = (VIEW_JOIN_WEBINAR,)
+            rels = (VIEW_JOIN_WEBINAR, VIEW_WEBINAR_UNREGISTER)
         else:
             rels = (VIEW_WEBINAR_REGISTRATION_FIELDS, VIEW_WEBINAR_REGISTER)
 
