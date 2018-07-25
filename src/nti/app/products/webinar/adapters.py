@@ -54,7 +54,7 @@ def webinar_to_client(webinar, request):
 @component.adapter(IWebinar)
 @interface.implementer(IWebinarRegistrationMetadataContainer)
 class WebinarRegistrationMetadataContainer(CaseInsensitiveCheckingLastModifiedBTreeContainer,
-                                   SchemaConfigured):
+                                           SchemaConfigured):
     """
     Stores :class:`IWebinarRegistration` objects.
     """

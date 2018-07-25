@@ -46,6 +46,7 @@ class GoToWebinarClient(object):
     WEBINAR_ATTENDEES = '/organizers/%s/webinars/%s/attendees'
     SESSION_ATTENDEES = '/organizers/%s/webinars/%s/sessions/%s/attendees'
 
+    REGISTRANT = '/organizers/%s/webinars/%s/registrants/%s'
     REGISTRANTS = '/organizers/%s/webinars/%s/registrants'
     REGISTER_FIELDS = '/organizers/%s/webinars/%s/registrants/fields'
 
@@ -63,7 +64,7 @@ class GoToWebinarClient(object):
         self._access_token = result
         self.request.session['webinar.access_token'] = result
 
-    def _make_call(self, url, post_data=None, acceptable_return_codes=None):
+    def _make_call(self, url, post_data=None, delete=False, acceptable_return_codes=None):
         if not acceptable_return_codes:
             acceptable_return_codes = (200,)
         url = '%s%s' % (self.GOTO_BASE_URL, url)
@@ -77,6 +78,9 @@ class GoToWebinarClient(object):
                                      json=post_data,
                                      headers={'Authorization': access_header,
                                               'Accept': 'application/json'})
+            elif delete:
+                return requests.delete(url,
+                                       headers={'Authorization': access_header})
             else:
                 return requests.get(url,
                                     headers={'Authorization': access_header})
@@ -140,3 +144,11 @@ class GoToWebinarClient(object):
                 'organizer_key': self.authorized_integration.organizer_key,
                 'creator': creator}
         return IWebinarRegistrationMetadata(data)
+
+    def unregister_user(self, webinar_key, registrant_key):
+        url = self.REGISTRANT % (self.authorized_integration.organizer_key,
+                                 webinar_key,
+                                 registrant_key)
+        response = self._make_call(url, delete=True, acceptable_return_codes=(204, 404))
+        result = response.status_code == 200
+        return result
