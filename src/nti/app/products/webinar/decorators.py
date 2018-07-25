@@ -40,6 +40,8 @@ from nti.dataserver.authorization import is_admin_or_site_admin
 from nti.externalization.interfaces import StandardExternalFields
 from nti.externalization.interfaces import IExternalMappingDecorator
 
+from nti.links.interfaces import ILinkExternalHrefOnly
+
 from nti.links.links import Link
 
 LINKS = StandardExternalFields.LINKS
@@ -113,3 +115,8 @@ class _WebinarDecorator(AbstractAuthenticatedRequestAwareDecorator):
             link.__name__ = ''
             link.__parent__ = context
             links.append(link)
+
+        if 'href' not in result:
+            link = Link(context)
+            interface.alsoProvides(link, ILinkExternalHrefOnly)
+            result['href'] = link

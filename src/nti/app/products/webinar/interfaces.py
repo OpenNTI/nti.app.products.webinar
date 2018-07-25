@@ -313,6 +313,42 @@ class WebinarRegistrationError(WebinarClientError):
         super(WebinarRegistrationError, self).__init__(self.msg, json)
 
 
+class IUserWebinarProgress(IContained, ICreated, ILastModified):
+    """
+    Stores webinar progress for a given user and webinar.
+    """
+
+    registrantKey = ValidTextLine(title=u"Webinar registrant key",
+                                 required=True)
+
+    sessionKey = ValidTextLine(title=u"Webinar session key",
+                               required=True)
+
+    email = ValidTextLine(title=u'Webinar registrant email',
+                          required=False)
+
+    joinTime = DateTime(title=u'The time at which the webinar was joined',
+                         required=True)
+
+    leaveTime = DateTime(title=u'The time at which the webinar was joined',
+                         required=True)
+
+    attendanceTimeInSeconds = Int(title=u"The webinar time in seconds",
+                                  required=True)
+
+
+class IWebinarProgressContainer(IContainer):
+    """
+    A progress storage container for :class:`IWebinar` objects, accessible on the course context.
+    """
+    contains(IUserWebinarProgress)
+
+    def get_or_create_webinar(webinar):
+        """
+        Normalize the given :class:`IWebinar` in our container.
+        """
+
+
 import zope.deferredimport
 zope.deferredimport.initialize()
 

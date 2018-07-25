@@ -43,6 +43,8 @@ from nti.app.products.webinar.interfaces import IWebinarRegistrationMetadataCont
 
 from nti.app.products.webinar.utils import raise_error
 
+from nti.appserver.dataserver_pyramid_views import GenericGetView
+
 from nti.dataserver.authorization import ACT_READ
 from nti.dataserver.authorization import ACT_CONTENT_EDIT
 
@@ -255,3 +257,12 @@ class JoinWebinarView(AbstractAuthenticatedView):
                                 timestamp=datetime.utcnow()))
         self.request.environ['nti.request_had_transaction_side_effects'] = 'True'
         raise hexc.HTTPSeeOther(location=registration_metadata.join_url)
+
+
+@view_config(route_name='objects.generic.traversal',
+             context=IWebinar,
+             request_method='GET',
+             permission=ACT_READ,
+             renderer='rest')
+class WebinarGetView(GenericGetView):
+    pass
