@@ -10,8 +10,6 @@ from __future__ import absolute_import
 
 import requests
 
-from pyramid.interfaces import IRequest
-
 from zope import component
 from zope import interface
 
@@ -30,13 +28,16 @@ from nti.app.products.webinar.utils import raise_error
 logger = __import__('logging').getLogger(__name__)
 
 
-@component.adapter(IGoToWebinarAuthorizedIntegration, IRequest)
+@component.adapter(IGoToWebinarAuthorizedIntegration)
 @interface.implementer(IWebinarClient)
 class GoToWebinarClient(object):
     """
     The client to interact with making GOTO webinar API calls. This should
     live within a single request lifespan.
     """
+
+    _access_token = None
+
     GOTO_BASE_URL = 'https://api.getgo.com/G2W/rest'
 
     WEBINAR_URL = '/organizers/%s/webinars/%s'
@@ -50,26 +51,18 @@ class GoToWebinarClient(object):
     REGISTRANTS = '/organizers/%s/webinars/%s/registrants'
     REGISTER_FIELDS = '/organizers/%s/webinars/%s/registrants/fields'
 
-    def __init__(self, authorized_integration, request):
+    def __init__(self, authorized_integration):
         self.authorized_integration = authorized_integration
-        self.request = request
-        self._access_token = self.request.session.get('webinar.access_token')
-
-    def _get_access_token(self):
         self._access_token = self.authorized_integration.access_token
-        self.request.session['webinar.access_token'] = self._access_token
 
     def _update_access_token(self):
         result = self.authorized_integration.update_tokens(self._access_token)
         self._access_token = result
-        self.request.session['webinar.access_token'] = result
 
     def _make_call(self, url, post_data=None, delete=False, acceptable_return_codes=None):
         if not acceptable_return_codes:
             acceptable_return_codes = (200,)
         url = '%s%s' % (self.GOTO_BASE_URL, url)
-        if self._access_token is None:
-            self._get_access_token()
 
         def _do_make_call():
             access_header = 'Bearer %s' % self._access_token

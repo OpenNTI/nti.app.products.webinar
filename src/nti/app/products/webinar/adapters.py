@@ -7,8 +7,6 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import absolute_import
 
-from pyramid.interfaces import IRequest
-
 from ZODB.interfaces import IConnection
 
 from zope import component
@@ -44,11 +42,10 @@ def webinar_to_auth_integration(unused_webinar):
 
 
 @interface.implementer(IWebinarClient)
-@component.adapter(IWebinar, IRequest)
-def webinar_to_client(webinar, request):
+@component.adapter(IWebinar)
+def webinar_to_client(webinar):
     auth_integration = IGoToWebinarAuthorizedIntegration(webinar)
-    return component.queryMultiAdapter((auth_integration, request),
-                                        IWebinarClient)
+    return IWebinarClient(auth_integration)
 
 
 @component.adapter(IWebinar)

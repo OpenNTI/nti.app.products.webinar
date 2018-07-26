@@ -89,8 +89,7 @@ class UpcomingWebinarsView(AbstractAuthenticatedView):
     """
 
     def __call__(self):
-        client = component.queryMultiAdapter((self.context, self.request),
-                                             IWebinarClient)
+        client = IWebinarClient(self.context)
         webinars = client.get_upcoming_webinars()
         result = LocatedExternalDict()
         result[ITEMS] = webinars
@@ -153,8 +152,7 @@ class WebinarRegistrationFieldView(AbstractAuthenticatedView):
     """
 
     def __call__(self):
-        client = component.queryMultiAdapter((self.context, self.request),
-                                             IWebinarClient)
+        client = IWebinarClient(self.context)
         result = client.get_registration_fields(self.context.webinarKey)
         if not result:
             raise_error({'message': _(u"Webinar does not exist."),
@@ -181,8 +179,7 @@ class WebinarRegisterView(AbstractAuthenticatedView,
         if not registration_data:
             raise_error({'message': _(u"Must supply registration information."),
                          'code': 'RegistrationDataNotFoundError'})
-        client = component.queryMultiAdapter((self.context, self.request),
-                                             IWebinarClient)
+        client = IWebinarClient(self.context)
         try:
             registration_metadata = client.register_user(self.remoteUser,
                                                          self.context.webinarKey,
@@ -218,8 +215,7 @@ class WebinarUnRegisterView(AbstractAuthenticatedView):
     """
 
     def __call__(self):
-        client = component.queryMultiAdapter((self.context, self.request),
-                                             IWebinarClient)
+        client = IWebinarClient(self.context)
         container = IWebinarRegistrationMetadataContainer(self.context)
         username = self.remoteUser.username
         if username in container:

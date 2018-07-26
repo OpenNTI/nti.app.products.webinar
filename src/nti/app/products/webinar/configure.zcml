@@ -12,8 +12,7 @@
 
     <!-- Adapters -->
     <adapter factory=".client.GoToWebinarClient"
-             for=".interfaces.IGoToWebinarAuthorizedIntegration
-                  pyramid.interfaces.IRequest"
+             for=".interfaces.IGoToWebinarAuthorizedIntegration"
              provides=".interfaces.IWebinarClient" />
 
     <adapter factory=".adapters.webinar_to_auth_integration"
@@ -21,8 +20,7 @@
              provides=".interfaces.IGoToWebinarAuthorizedIntegration" />
 
     <adapter factory=".adapters.webinar_to_client"
-             for=".interfaces.IWebinar
-                  pyramid.interfaces.IRequest"
+             for=".interfaces.IWebinar"
              provides=".interfaces.IWebinarClient" />
 
     <adapter factory=".adapters.WebinarRegistrationMetadataContainerFactory"
