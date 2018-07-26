@@ -102,7 +102,10 @@ def update_webinar_progress(webinar):
                                                      IUserWebinarProgressContainer)
         user_progress_objs = registrant_key_to_progress.get(user_reg.registrant_key)
         for user_progress in user_progress_objs or ():
-            user_container[user_progress.sessionKey] = user_progress
+            # XXX Is this what we want? Would we ever need to update an
+            # existing record?
+            if user_progress.sessionKey not in user_container:
+                user_container[user_progress.sessionKey] = user_progress
 
     progress_container = IWebinarProgressContainer(webinar)
     progress_container.last_updated = datetime.utcnow()
