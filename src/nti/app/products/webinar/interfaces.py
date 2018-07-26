@@ -357,15 +357,15 @@ class IUserWebinarProgressContainer(IContainer):
     """
     contains(IUserWebinarProgress)
 
-    last_updated = ValidDatetime(title=u'The last time webinar progress was updated',
-                                 required=True)
-
 
 class IWebinarProgressContainer(IContainer):
     """
-    A progress storage container for :class:`IWebinar` objects, accessible on the course context.
+    A progress storage container for :class:`IWebinar` objects.
     """
     contains(IUserWebinarProgressContainer)
+
+    last_updated = ValidDatetime(title=u'The last time webinar progress was updated',
+                                 required=True)
 
 
 import zope.deferredimport
