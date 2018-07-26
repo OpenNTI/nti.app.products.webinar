@@ -8,6 +8,7 @@ from __future__ import absolute_import
 # pylint: disable=protected-access,too-many-public-methods
 
 from hamcrest import is_
+from hamcrest import not_none
 from hamcrest import has_length
 from hamcrest import assert_that
 
@@ -26,6 +27,8 @@ from nti.app.products.webinar.interfaces import IWebinarField
 from nti.app.products.webinar.interfaces import IWebinarSession
 from nti.app.products.webinar.interfaces import IWebinarQuestion
 from nti.app.products.webinar.interfaces import IWebinarCollection
+from nti.app.products.webinar.interfaces import IUserWebinarProgress
+from nti.app.products.webinar.interfaces import IUserWebinarAttendance
 from nti.app.products.webinar.interfaces import IWebinarQuestionAnswer
 from nti.app.products.webinar.interfaces import IWebinarRegistrationMetadata
 from nti.app.products.webinar.interfaces import IWebinarRegistrationFields
@@ -54,6 +57,21 @@ metadata_json = {
           "registrant_key": u"reg_key",
           "join_url": u"http://reg_url",
           "creator": "creator"
+}
+
+user_progress = {
+    "registrantKey": 111111111,
+    "firstName": "first",
+    "lastName": "last",
+    "email": "user_email",
+    "attendanceTimeInSeconds": 30,
+    "sessionKey": 999999,
+    "attendance": [
+      {
+        "joinTime": "2018-07-24T20:00:00Z",
+        "leaveTime": "2018-07-24T20:00:00Z"
+      }
+    ]
 }
 
 
@@ -117,3 +135,18 @@ class TestWebinarClientInternalization(unittest.TestCase):
         assert_that(metadata.join_url, is_('http://reg_url'))
         assert_that(metadata.registrant_key, is_('reg_key'))
         assert_that(metadata.webinar_key, is_("222222222222"))
+
+    def test_progress(self):
+        progress = IUserWebinarProgress(user_progress)
+        assert_that(progress, verifiably_provides(IUserWebinarProgress))
+        assert_that(progress.registrantKey, is_("111111111"))
+        assert_that(progress.sessionKey, is_('999999'))
+        assert_that(progress.email, is_('user_email'))
+        assert_that(progress.attendanceTimeInSeconds, is_(30))
+
+        attendance = progress.attendance
+        assert_that(attendance, has_length(1))
+        attendance = attendance[0]
+        assert_that(attendance, verifiably_provides(IUserWebinarAttendance))
+        assert_that(attendance.joinTime, not_none())
+        assert_that(attendance.leaveTime, not_none())

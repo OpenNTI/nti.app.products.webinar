@@ -56,6 +56,8 @@
                          .interfaces.IWebinarQuestion
                          .interfaces.IWebinarCollection
                          .interfaces.IWebinarIntegration
+                         .interfaces.IUserWebinarProgress
+                         .interfaces.IUserWebinarAttendance
                          .interfaces.IWebinarQuestionAnswer
                          .interfaces.IWebinarRegistrationFields
                          .interfaces.IWebinarRegistrationMetadata
@@ -99,6 +101,14 @@
     <adapter factory=".client_models._webinar_collection_factory"
              for="list"
              provides=".interfaces.IWebinarCollection" />
+
+    <adapter factory=".client_models._user_webinar_attendance_factory"
+             for="dict"
+             provides=".interfaces.IUserWebinarAttendance" />
+
+    <adapter factory=".client_models._user_webinar_progress_factory"
+             for="dict"
+             provides=".interfaces.IUserWebinarProgress" />
 
     <!-- Integration -->
     <utility factory=".integration.WebinarIntegrationProvider" />
