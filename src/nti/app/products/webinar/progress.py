@@ -17,11 +17,8 @@ from zope import interface
 
 from zope.annotation import IAnnotations
 
-from zope.container.contained import Contained
-
 from nti.app.products.webinar.interfaces import IWebinar
 from nti.app.products.webinar.interfaces import IWebinarClient
-from nti.app.products.webinar.interfaces import IUserWebinarProgress
 from nti.app.products.webinar.interfaces import IWebinarProgressContainer
 from nti.app.products.webinar.interfaces import IUserWebinarProgressContainer
 from nti.app.products.webinar.interfaces import IWebinarRegistrationMetadataContainer
@@ -31,10 +28,6 @@ from nti.containers.containers import CaseInsensitiveCheckingLastModifiedBTreeCo
 from nti.coremetadata.interfaces import IUser
 
 from nti.dataserver.users import User
-
-from nti.dublincore.time_mixins import PersistentCreatedAndModifiedTimeObject
-
-from nti.externalization.representation import WithRepr
 
 from nti.schema.fieldproperty import createDirectFieldProperties
 
@@ -110,6 +103,9 @@ def update_webinar_progress(webinar):
         user_progress_objs = registrant_key_to_progress.get(user_reg.registrant_key)
         for user_progress in user_progress_objs or ():
             user_container[user_progress.sessionKey] = user_progress
+
+    progress_container = IWebinarProgressContainer(webinar)
+    progress_container.last_updated = datetime.utcnow()
 
 
 def should_update_progress(webinar):
