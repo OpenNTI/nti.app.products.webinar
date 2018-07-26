@@ -9,6 +9,11 @@
 	<include package="zope.security" file="meta.zcml" />
 	<include package="zope.component" />
 	<include package="zope.security" />
+	<include package="zope.annotation" />
+
+    <class class=".client_models.Webinar">
+        <implements interface="zope.annotation.interfaces.IAttributeAnnotatable" />
+    </class>
 
     <!-- Adapters -->
     <adapter factory=".client.GoToWebinarClient"
@@ -26,6 +31,15 @@
     <adapter factory=".adapters.WebinarRegistrationMetadataContainerFactory"
              provides=".interfaces.IWebinarRegistrationMetadataContainer"
              for=".interfaces.IWebinar" />
+
+    <adapter factory=".progress.webinar_to_webinar_progress_container"
+             provides=".interfaces.IWebinarProgressContainer"
+             for=".interfaces.IWebinar" />
+
+    <adapter factory=".progress._webinar_to_user_container"
+             provides=".interfaces.IUserWebinarProgressContainer"
+             for="nti.coremetadata.interfaces.IUser
+                  .interfaces.IWebinar" />
 
     <!-- Decorators -->
     <subscriber factory=".decorators._WebinarAuthorizeDecorator"
@@ -54,6 +68,8 @@
                          .interfaces.IWebinarQuestion
                          .interfaces.IWebinarCollection
                          .interfaces.IWebinarIntegration
+                         .interfaces.IUserWebinarProgress
+                         .interfaces.IUserWebinarAttendance
                          .interfaces.IWebinarQuestionAnswer
                          .interfaces.IWebinarRegistrationFields
                          .interfaces.IWebinarRegistrationMetadata
@@ -97,6 +113,14 @@
     <adapter factory=".client_models._webinar_collection_factory"
              for="list"
              provides=".interfaces.IWebinarCollection" />
+
+    <adapter factory=".client_models._user_webinar_attendance_factory"
+             for="dict"
+             provides=".interfaces.IUserWebinarAttendance" />
+
+    <adapter factory=".client_models._user_webinar_progress_factory"
+             for="dict"
+             provides=".interfaces.IUserWebinarProgress" />
 
     <!-- Integration -->
     <utility factory=".integration.WebinarIntegrationProvider" />

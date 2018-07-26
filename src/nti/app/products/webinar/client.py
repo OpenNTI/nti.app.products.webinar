@@ -16,6 +16,7 @@ from zope import interface
 from nti.app.products.webinar.interfaces import IWebinar
 from nti.app.products.webinar.interfaces import IWebinarClient
 from nti.app.products.webinar.interfaces import IWebinarCollection
+from nti.app.products.webinar.interfaces import IUserWebinarProgress
 from nti.app.products.webinar.interfaces import WebinarRegistrationError
 from nti.app.products.webinar.interfaces import IWebinarRegistrationFields
 from nti.app.products.webinar.interfaces import IWebinarRegistrationMetadata
@@ -44,8 +45,8 @@ class GoToWebinarClient(object):
     UPCOMING_WEBINARS = '/organizers/%s/upcomingWebinars'
 
     WEBINAR_SESSIONS = '/organizers/%s/webinars/%s/sessions'
-    WEBINAR_ATTENDEES = '/organizers/%s/webinars/%s/attendees'
-    SESSION_ATTENDEES = '/organizers/%s/webinars/%s/sessions/%s/attendees'
+    WEBINAR_PROGRESS = '/organizers/%s/webinars/%s/attendees'
+    SESSION_PROGRESS = '/organizers/%s/webinars/%s/sessions/%s/attendees'
 
     REGISTRANT = '/organizers/%s/webinars/%s/registrants/%s'
     REGISTRANTS = '/organizers/%s/webinars/%s/registrants'
@@ -142,6 +143,16 @@ class GoToWebinarClient(object):
         url = self.REGISTRANT % (self.authorized_integration.organizer_key,
                                  webinar_key,
                                  registrant_key)
-        response = self._make_call(url, delete=True, acceptable_return_codes=(204, 404))
+        response = self._make_call(url, delete=True,
+                                   acceptable_return_codes=(204, 404))
         result = response.status_code == 200
+        return result
+
+    def get_webinar_progress(self, webinar_key):
+        url = self.WEBINAR_PROGRESS % (self.authorized_integration.organizer_key,
+                                       webinar_key)
+        get_response = self._make_call(url)
+        result = None
+        if get_response.status_code != 404:
+            result = [IUserWebinarProgress(x) for x in get_response.json()]
         return result

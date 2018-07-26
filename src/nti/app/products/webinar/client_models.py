@@ -13,18 +13,24 @@ from zope import interface
 
 from zope.annotation.interfaces import IAttributeAnnotatable
 
+from zope.container.contained import Contained
+
 from nti.app.products.webinar.interfaces import IWebinar
 from nti.app.products.webinar.interfaces import IWebinarField
 from nti.app.products.webinar.interfaces import IWebinarSession
 from nti.app.products.webinar.interfaces import IWebinarQuestion
 from nti.app.products.webinar.interfaces import IWebinarCollection
+from nti.app.products.webinar.interfaces import IUserWebinarProgress
 from nti.app.products.webinar.interfaces import IWebinarQuestionAnswer
+from nti.app.products.webinar.interfaces import IUserWebinarAttendance
 from nti.app.products.webinar.interfaces import IWebinarRegistrationFields
 from nti.app.products.webinar.interfaces import IWebinarRegistrationMetadata
 
 from nti.dublincore.time_mixins import PersistentCreatedAndModifiedTimeObject
 
 from nti.externalization.internalization import update_from_external_object
+
+from nti.externalization.representation import WithRepr
 
 from nti.ntiids.oids import to_external_ntiid_oid
 
@@ -82,7 +88,7 @@ def _webinar_factory(ext):
     # We need these to be unicode or we may have rounding issues
     for key in ('organizerKey', 'webinarKey'):
         ext[key] = unicode(ext[key])
-    ext['times'] = [IWebinarSession(x) for x in ext['times'] or ()]
+    ext['times'] = [IWebinarSession(x) for x in ext.get('times') or ()]
     update_from_external_object(obj, ext)
     return obj
 
@@ -109,6 +115,27 @@ def _webinar_collection_factory(ext):
 @interface.implementer(IWebinarRegistrationMetadata)
 def _webinar_registration_metadata_factory(ext):
     obj = WebinarRegistrationMetadata()
+    update_from_external_object(obj, ext)
+    return obj
+
+
+@component.adapter(dict)
+@interface.implementer(IUserWebinarAttendance)
+def _user_webinar_attendance_factory(ext):
+    obj = UserWebinarAttendance()
+    update_from_external_object(obj, ext)
+    return obj
+
+
+@component.adapter(dict)
+@interface.implementer(IUserWebinarProgress)
+def _user_webinar_progress_factory(ext):
+    obj = UserWebinarProgress()
+    for key in ('registrantKey', 'sessionKey'):
+        if key in ext:
+            ext[key] = str(ext[key])
+    if 'attendance' in ext:
+        ext['attendance'] = [IUserWebinarAttendance(x) for x in ext['attendance']]
     update_from_external_object(obj, ext)
     return obj
 
@@ -152,6 +179,31 @@ class WebinarSession(PersistentCreatedAndModifiedTimeObject,
     createDirectFieldProperties(IWebinarSession)
 
     mimeType = mime_type = "application/vnd.nextthought.webinarsession"
+
+
+@interface.implementer(IUserWebinarAttendance)
+class UserWebinarAttendance(PersistentCreatedAndModifiedTimeObject,
+                            SchemaConfigured):
+
+    createDirectFieldProperties(IUserWebinarAttendance)
+
+    mimeType = mime_type = "application/vnd.nextthought.userwebinarattendance"
+
+
+@WithRepr
+@interface.implementer(IUserWebinarProgress)
+class UserWebinarProgress(PersistentCreatedAndModifiedTimeObject,
+                          Contained,
+                          SchemaConfigured):
+    createDirectFieldProperties(IUserWebinarProgress)
+
+    __parent__ = None
+
+    mimeType = mime_type = "application/vnd.nextthought.webinar.userprogress"
+
+    @property
+    def __name__(self):
+        return unicode(self.sessionKey)
 
 
 @EqHash('webinarKey')

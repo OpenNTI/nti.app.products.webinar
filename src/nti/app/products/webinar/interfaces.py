@@ -12,6 +12,8 @@ from __future__ import absolute_import
 
 from zope import interface
 
+from zope.annotation.interfaces import IAttributeAnnotatable
+
 from zope.container.constraints import contains
 
 from zope.container.interfaces import IContained
@@ -31,7 +33,6 @@ from nti.schema.field import Bool
 from nti.schema.field import Number
 from nti.schema.field import Object
 from nti.schema.field import HTTPURL
-from nti.schema.field import DateTime
 from nti.schema.field import ValidText
 from nti.schema.field import ListOrTuple
 from nti.schema.field import ValidDatetime
@@ -122,6 +123,11 @@ class IWebinarClient(interface.Interface):
         Unregister the given registrant key.
         """
 
+    def get_webinar_progress(webinar_key):
+        """
+        Get all :class:`IUserWebinarProgress` for all sessions of this webinar.
+        """
+
 
 class IWebinarSession(interface.Interface):
 
@@ -132,7 +138,7 @@ class IWebinarSession(interface.Interface):
                             required=True)
 
 
-class IWebinar(IShouldHaveTraversablePath):
+class IWebinar(IShouldHaveTraversablePath, IAttributeAnnotatable):
 
     description = ValidText(title=u"Webinar description",
                             required=True)
@@ -260,8 +266,8 @@ class IJoinWebinarEvent(interface.Interface):
                    title=u'The webinar that was join.',
                    required=True)
 
-    timestamp = DateTime(title=u'The time at which the webinar was joined',
-                         required=True)
+    timestamp = ValidDatetime(title=u'The time at which the webinar was joined',
+                              required=True)
 
 
 @interface.implementer(IJoinWebinarEvent)
@@ -313,7 +319,16 @@ class WebinarRegistrationError(WebinarClientError):
         super(WebinarRegistrationError, self).__init__(self.msg, json)
 
 
-class IUserWebinarProgress(IContained, ICreated, ILastModified):
+class IUserWebinarAttendance(interface.Interface):
+
+    joinTime = ValidDatetime(title=u'The time at which the webinar was joined',
+                             required=True)
+
+    leaveTime = ValidDatetime(title=u'The time at which the webinar was left',
+                              required=True)
+
+
+class IUserWebinarProgress(IContained, ILastModified):
     """
     Stores webinar progress for a given user and webinar.
     """
@@ -327,26 +342,30 @@ class IUserWebinarProgress(IContained, ICreated, ILastModified):
     email = ValidTextLine(title=u'Webinar registrant email',
                           required=False)
 
-    joinTime = DateTime(title=u'The time at which the webinar was joined',
-                         required=True)
-
-    leaveTime = DateTime(title=u'The time at which the webinar was joined',
-                         required=True)
+    attendance = ListOrTuple(Object(IUserWebinarAttendance),
+                             title=u"Webinar attendance",
+                             required=False,
+                             min_length=0)
 
     attendanceTimeInSeconds = Int(title=u"The webinar time in seconds",
                                   required=True)
 
 
-class IWebinarProgressContainer(IContainer):
+class IUserWebinarProgressContainer(IContainer):
     """
-    A progress storage container for :class:`IWebinar` objects, accessible on the course context.
+    A user progress storage container for a :class:`IWebinar` objects, stored by session.
     """
     contains(IUserWebinarProgress)
 
-    def get_or_create_webinar(webinar):
-        """
-        Normalize the given :class:`IWebinar` in our container.
-        """
+
+class IWebinarProgressContainer(IContainer):
+    """
+    A progress storage container for :class:`IWebinar` objects.
+    """
+    contains(IUserWebinarProgressContainer)
+
+    last_updated = ValidDatetime(title=u'The last time webinar progress was updated',
+                                 required=True)
 
 
 import zope.deferredimport
