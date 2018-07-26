@@ -198,12 +198,9 @@ class UserWebinarProgress(PersistentCreatedAndModifiedTimeObject,
     createDirectFieldProperties(IUserWebinarProgress)
 
     __parent__ = None
+    __name__ = None
 
     mimeType = mime_type = "application/vnd.nextthought.webinar.userprogress"
-
-    @property
-    def __name__(self):
-        return unicode(self.sessionKey)
 
 
 @EqHash('webinarKey')
