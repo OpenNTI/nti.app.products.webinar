@@ -159,7 +159,7 @@ class IWebinar(IShouldHaveTraversablePath, IAttributeAnnotatable):
                              required=True)
 
     registrationUrl = HTTPURL(title=u"Webinar registrationUrl",
-                              required=True)
+                              required=False)
 
     webinarID = ValidTextLine(title=u"Webinar webinarID",
                               required=True)
