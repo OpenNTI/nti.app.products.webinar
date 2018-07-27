@@ -77,14 +77,22 @@ class IWebinarClient(interface.Interface):
     A webinar client to fetch webinar information.
     """
 
-    def get_webinar(webinar_key):
+    def get_webinar(webinar_key, raw=False):
         """
-        Get the :class:`IWebinar` for the given key or None.
+        Get the :class:`IWebinar` for the given key or None; optionally
+        returning the raw json.
         """
 
-    def get_upcoming_webinars():
+    def get_all_webinars(raw=False):
         """
-        Get all upcoming webinars for our organizer.
+        Get all webinars for our organizer; optionally
+        returning the raw json.
+        """
+
+    def get_upcoming_webinars(raw=False):
+        """
+        Get all upcoming webinars for our organizer; optionally
+        returning the raw json.
         """
 
     def update_webinar(webinar):

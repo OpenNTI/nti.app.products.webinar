@@ -41,6 +41,7 @@ class GoToWebinarClient(object):
 
     GOTO_BASE_URL = 'https://api.getgo.com/G2W/rest'
 
+    ALL_WEBINARS = '/organizers/%s/webinars'
     WEBINAR_URL = '/organizers/%s/webinars/%s'
     UPCOMING_WEBINARS = '/organizers/%s/upcomingWebinars'
 
@@ -91,6 +92,14 @@ class GoToWebinarClient(object):
             raise_error({'message': _(u"Error during webinar call."),
                          'code': 'WebinarClientAPIError'})
         return response
+
+    def get_all_webinars(self, raw=False):
+        url = self.ALL_WEBINARS % self.authorized_integration.organizer_key
+        result = self._make_call(url)
+        if raw:
+            return result.json()
+        result = IWebinarCollection(result.json())
+        return result.webinars
 
     def get_upcoming_webinars(self, raw=False):
         url = self.UPCOMING_WEBINARS % self.authorized_integration.organizer_key
