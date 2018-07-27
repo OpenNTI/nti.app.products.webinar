@@ -85,12 +85,6 @@ def _webinar_registration_fields_factory(ext):
 @interface.implementer(IWebinar)
 def _webinar_factory(ext):
     obj = Webinar()
-    # We need these to be unicode or we may have rounding issues
-    for key in ('organizerKey', 'webinarKey'):
-        ext[key] = unicode(ext[key])
-    if 'registrationUrl' in ext and not ext['registrationUrl']:
-        ext['registrationUrl'] = None
-    ext['times'] = [IWebinarSession(x) for x in ext.get('times') or ()]
     update_from_external_object(obj, ext)
     return obj
 

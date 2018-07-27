@@ -92,18 +92,23 @@ class GoToWebinarClient(object):
                          'code': 'WebinarClientAPIError'})
         return response
 
-    def get_upcoming_webinars(self):
+    def get_upcoming_webinars(self, raw=False):
         url = self.UPCOMING_WEBINARS % self.authorized_integration.organizer_key
         result = self._make_call(url)
+        if raw:
+            return result.json()
         result = IWebinarCollection(result.json())
         return result.webinars
 
-    def get_webinar(self, webinar_key):
+    def get_webinar(self, webinar_key, raw=False):
         url = self.WEBINAR_URL % (self.authorized_integration.organizer_key, webinar_key)
         get_response = self._make_call(url, acceptable_return_codes=(200, 404))
         result = None
         if get_response.status_code != 404:
-            result = IWebinar(get_response.json())
+            if raw:
+                result = get_response.json()
+            else:
+                result = IWebinar(get_response.json())
         return result
 
     def get_registration_fields(self, webinar_key):

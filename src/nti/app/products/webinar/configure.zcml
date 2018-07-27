@@ -122,6 +122,11 @@
              for="dict"
              provides=".interfaces.IUserWebinarProgress" />
 
+    <!-- Internalization -->
+    <adapter factory=".internalization.WebinarUpdater"
+             provides="nti.externalization.interfaces.IInternalObjectUpdater"
+             for=".interfaces.IWebinar" />
+
     <!-- Integration -->
     <utility factory=".integration.WebinarIntegrationProvider" />
 
