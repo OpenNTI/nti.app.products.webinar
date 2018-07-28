@@ -29,6 +29,7 @@ from nti.app.products.webinar import VIEW_RESOLVE_WEBINAR
 from nti.app.products.webinar import VIEW_WEBINAR_REGISTER
 from nti.app.products.webinar import VIEW_UPCOMING_WEBINARS
 from nti.app.products.webinar import VIEW_WEBINAR_UNREGISTER
+from nti.app.products.webinar import VIEW_WEBINAR_REGISTRATIONS
 from nti.app.products.webinar import VIEW_WEBINAR_REGISTRATION_FIELDS
 
 from nti.app.products.webinar import MessageFactory as _
@@ -46,6 +47,7 @@ from nti.app.products.webinar.utils import raise_error
 from nti.appserver.dataserver_pyramid_views import GenericGetView
 
 from nti.dataserver.authorization import ACT_READ
+from nti.dataserver.authorization import ACT_NTI_ADMIN
 from nti.dataserver.authorization import ACT_CONTENT_EDIT
 
 from nti.externalization.externalization import StandardExternalFields
@@ -262,3 +264,22 @@ class JoinWebinarView(AbstractAuthenticatedView):
              renderer='rest')
 class WebinarGetView(GenericGetView):
     pass
+
+
+@view_config(route_name='objects.generic.traversal',
+             context=IWebinar,
+             request_method='GET',
+             name=VIEW_WEBINAR_REGISTRATIONS,
+             permission=ACT_NTI_ADMIN,
+             renderer='rest')
+class WebinarRegistrationsView(AbstractAuthenticatedView):
+    """
+    Allows the user to join the contextual :class:`IWebinar` object.
+    """
+
+    def __call__(self):
+        container = IWebinarRegistrationMetadataContainer(self.context)
+        result = LocatedExternalDict()
+        result[ITEMS] = dict(container)
+        result[TOTAL] = result[ITEM_COUNT] = len(container)
+        return result
