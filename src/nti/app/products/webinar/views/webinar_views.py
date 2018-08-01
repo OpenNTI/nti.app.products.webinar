@@ -157,7 +157,7 @@ class WebinarRegistrationFieldView(AbstractAuthenticatedView):
         client = IWebinarClient(self.context, None)
         if client is None:
             raise_error({'message': _(u"No longer have an integration for this webinar."),
-                         'code': 'WebinarRegistrationValidationError'},
+                         'code': 'UnauthorizedWebinarError'},
                          factory=hexc.HTTPUnprocessableEntity)
 
         result = client.get_registration_fields(self.context.webinarKey)
@@ -190,7 +190,7 @@ class WebinarRegisterView(AbstractAuthenticatedView,
         client = IWebinarClient(self.context, None)
         if client is None:
             raise_error({'message': _(u"No longer have an integration for this webinar."),
-                         'code': 'WebinarRegistrationValidationError'},
+                         'code': 'UnauthorizedWebinarError'},
                          factory=hexc.HTTPUnprocessableEntity)
 
         try:
@@ -231,7 +231,7 @@ class WebinarUnRegisterView(AbstractAuthenticatedView):
         client = IWebinarClient(self.context, None)
         if client is None:
             raise_error({'message': _(u"No longer have an integration for this webinar."),
-                         'code': 'WebinarRegistrationValidationError'},
+                         'code': 'UnauthorizedWebinarError'},
                          factory=hexc.HTTPUnprocessableEntity)
         container = IWebinarRegistrationMetadataContainer(self.context)
         username = self.remoteUser.username
