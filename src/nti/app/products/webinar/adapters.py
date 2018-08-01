@@ -33,19 +33,21 @@ logger = __import__('logging').getLogger(__name__)
 
 @interface.implementer(IGoToWebinarAuthorizedIntegration)
 @component.adapter(IWebinar)
-def webinar_to_auth_integration(unused_webinar):
+def webinar_to_auth_integration(webinar):
     """
-    Return registered utility. When we have to be smarter, we will need to
-    check organizerKey etc.
+    Return registered utility, but only if the organizer key matches. The
+    alternative indicates webinar in un-maintable states.
     """
-    return component.queryUtility(IGoToWebinarAuthorizedIntegration)
+    result = component.queryUtility(IGoToWebinarAuthorizedIntegration)
+    if webinar.organizerKey == result.organizer_key:
+        return result
 
 
 @interface.implementer(IWebinarClient)
 @component.adapter(IWebinar)
 def webinar_to_client(webinar):
-    auth_integration = IGoToWebinarAuthorizedIntegration(webinar)
-    return IWebinarClient(auth_integration)
+    auth_integration = IGoToWebinarAuthorizedIntegration(webinar, None)
+    return IWebinarClient(auth_integration, None)
 
 
 @component.adapter(IWebinar)

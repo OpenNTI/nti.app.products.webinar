@@ -154,7 +154,12 @@ class WebinarRegistrationFieldView(AbstractAuthenticatedView):
     """
 
     def __call__(self):
-        client = IWebinarClient(self.context)
+        client = IWebinarClient(self.context, None)
+        if client is None:
+            raise_error({'message': _(u"No longer have an integration for this webinar."),
+                         'code': 'WebinarRegistrationValidationError'},
+                         factory=hexc.HTTPUnprocessableEntity)
+
         result = client.get_registration_fields(self.context.webinarKey)
         if not result:
             raise_error({'message': _(u"Webinar does not exist."),
@@ -181,7 +186,13 @@ class WebinarRegisterView(AbstractAuthenticatedView,
         if not registration_data:
             raise_error({'message': _(u"Must supply registration information."),
                          'code': 'RegistrationDataNotFoundError'})
-        client = IWebinarClient(self.context)
+
+        client = IWebinarClient(self.context, None)
+        if client is None:
+            raise_error({'message': _(u"No longer have an integration for this webinar."),
+                         'code': 'WebinarRegistrationValidationError'},
+                         factory=hexc.HTTPUnprocessableEntity)
+
         try:
             registration_metadata = client.register_user(self.remoteUser,
                                                          self.context.webinarKey,
@@ -217,7 +228,11 @@ class WebinarUnRegisterView(AbstractAuthenticatedView):
     """
 
     def __call__(self):
-        client = IWebinarClient(self.context)
+        client = IWebinarClient(self.context, None)
+        if client is None:
+            raise_error({'message': _(u"No longer have an integration for this webinar."),
+                         'code': 'WebinarRegistrationValidationError'},
+                         factory=hexc.HTTPUnprocessableEntity)
         container = IWebinarRegistrationMetadataContainer(self.context)
         username = self.remoteUser.username
         if username in container:

@@ -24,6 +24,7 @@ from nti.app.products.webinar import VIEW_WEBINAR_UNREGISTER
 from nti.app.products.webinar import VIEW_WEBINAR_REGISTRATION_FIELDS
 
 from nti.app.products.webinar.interfaces import IWebinar
+from nti.app.products.webinar.interfaces import IWebinarClient
 from nti.app.products.webinar.interfaces import IWebinarIntegration
 from nti.app.products.webinar.interfaces import IWebinarAuthorizedIntegration
 from nti.app.products.webinar.interfaces import IWebinarRegistrationMetadataContainer
@@ -93,8 +94,11 @@ class _AuthorizedWebinarDecorator(AbstractAuthenticatedRequestAwareDecorator):
 class _WebinarDecorator(AbstractAuthenticatedRequestAwareDecorator):
 
     def _predicate(self, context, unused_result):
+        # The user could still join the webinar even if we do not
+        # have an integration, but we could not get progress back.
         return super(_WebinarDecorator, self)._predicate(context, unused_result) \
-           and has_permission(ACT_READ, context, self.request)
+           and has_permission(ACT_READ, context, self.request) \
+           and IWebinarClient(context, None) is not None
 
     def is_registered(self, webinar):
         reg_container = IWebinarRegistrationMetadataContainer(webinar)
