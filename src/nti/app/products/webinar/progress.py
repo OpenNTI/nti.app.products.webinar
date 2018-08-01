@@ -88,6 +88,7 @@ def update_webinar_progress(webinar):
     if client is None:
         logger.info("Cannot update webinar (%s) since we cannot obtain a client (unauthorized)",
                     webinar)
+        return
     # Get the progress and store by registrantKey
     progress_collection = client.get_webinar_progress(webinar.webinarKey)
     registrant_key_to_progress = dict()
