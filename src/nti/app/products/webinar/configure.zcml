@@ -135,13 +135,22 @@
              provides="nti.wref.interfaces.IWeakRef"
              for="nti.app.products.webinar.interfaces.IWebinar" />
 
-    <!-- Webinar auth (localhost)-->
+    <!-- Webinar auth -->
     <include package="nti.common" file="meta.zcml" />
 
+    <!-- localhost -->
     <configure zcml:condition="have devmode">
         <oauth:registerOAuthKeys
-                apiKey="Gd94qpGWBETXoSJDj57if13tgr2aHrPE"
-                secretKey="B8rJgJSHUsJ6UqFC"
+                apiKey="FzsOeN9hWeAma03kldZAQCCNzIGW92Sf"
+                secretKey="DIEDGu1SS2aqR7J7"
+                id="webinar" />
+    </configure>
+
+    <!-- .nextthought.com -->
+    <configure zcml:condition="not-have devmode">
+        <oauth:registerOAuthKeys
+                apiKey="tb4uxiDMyRDgBa5AfJvKRgz3yqW4i076"
+                secretKey="WIf265eR7PlPUAIS"
                 id="webinar" />
     </configure>
 </configure>
