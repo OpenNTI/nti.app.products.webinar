@@ -39,7 +39,7 @@ def webinar_to_auth_integration(webinar):
     alternative indicates webinar in un-maintable states.
     """
     result = component.queryUtility(IGoToWebinarAuthorizedIntegration)
-    if webinar.organizerKey == result.organizer_key:
+    if result is not None and webinar.organizerKey == result.organizer_key:
         return result
 
 
