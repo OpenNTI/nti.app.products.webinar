@@ -168,6 +168,7 @@ class WebinarRegistrationFields(SchemaConfigured):
     mimeType = mime_type = "application/vnd.nextthought.webinarregistrationfields"
 
 
+@WithRepr
 @interface.implementer(IWebinarSession)
 class WebinarSession(PersistentCreatedAndModifiedTimeObject,
                      SchemaConfigured):
@@ -199,6 +200,7 @@ class UserWebinarProgress(PersistentCreatedAndModifiedTimeObject,
     mimeType = mime_type = "application/vnd.nextthought.webinar.userprogress"
 
 
+@WithRepr
 @EqHash('webinarKey')
 @interface.implementer(IWebinar, IAttributeAnnotatable)
 class Webinar(PersistentCreatedAndModifiedTimeObject,
@@ -229,6 +231,7 @@ class WebinarCollection(SchemaConfigured):
     mimeType = mime_type = "application/vnd.nextthought.webinarcollection"
 
 
+@WithRepr
 @interface.implementer(IWebinarRegistrationMetadata)
 class WebinarRegistrationMetadata(PersistentCreatedAndModifiedTimeObject,
                                   SchemaConfigured):
