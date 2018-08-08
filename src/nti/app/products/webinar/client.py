@@ -86,7 +86,8 @@ class GoToWebinarClient(object):
             response = _do_make_call()
 
         if response.status_code not in acceptable_return_codes:
-            logger.warn('Error while making webinar API call (%s) (%s)',
+            logger.warn('Error while making webinar API call (%s) (%s) (%s)',
+                        url,
                         response.status_code,
                         response.text)
             raise_error({'message': _(u"Error during webinar call."),
@@ -165,7 +166,8 @@ class GoToWebinarClient(object):
     def get_webinar_progress(self, webinar_key):
         url = self.WEBINAR_PROGRESS % (self.authorized_integration.organizer_key,
                                        webinar_key)
-        get_response = self._make_call(url)
+        get_response = self._make_call(url,
+                                       acceptable_return_codes = (200, 404))
         result = None
         if get_response.status_code != 404:
             result = [IUserWebinarProgress(x) for x in get_response.json()]
