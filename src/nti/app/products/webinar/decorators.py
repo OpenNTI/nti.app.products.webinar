@@ -101,6 +101,7 @@ class _WebinarDecorator(AbstractAuthenticatedRequestAwareDecorator):
            and IWebinarClient(context, None) is not None
 
     def is_registered(self, webinar):
+        # pylint: disable=no-member
         reg_container = IWebinarRegistrationMetadataContainer(webinar)
         return self.remoteUser.username in reg_container
 
