@@ -13,6 +13,8 @@ import requests
 from zope import component
 from zope import interface
 
+from zope.cachedescriptors.property import Lazy
+
 from nti.app.products.webinar.interfaces import IWebinar
 from nti.app.products.webinar.interfaces import IWebinarClient
 from nti.app.products.webinar.interfaces import IWebinarCollection
@@ -55,7 +57,10 @@ class GoToWebinarClient(object):
 
     def __init__(self, authorized_integration):
         self.authorized_integration = authorized_integration
-        self._access_token = self.authorized_integration.access_token
+
+    @Lazy
+    def _access_token(self):
+        return self.authorized_integration.access_token
 
     def _update_access_token(self):
         result = self.authorized_integration.update_tokens(self._access_token)
