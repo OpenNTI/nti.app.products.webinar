@@ -96,32 +96,42 @@ class _WebinarDecorator(AbstractAuthenticatedRequestAwareDecorator):
     def _predicate(self, context, unused_result):
         # The user could still join the webinar even if we do not
         # have an integration, but we could not get progress back.
-        return super(_WebinarDecorator, self)._predicate(context, unused_result) \
-           and has_permission(ACT_READ, context, self.request) \
-           and IWebinarClient(context, None) is not None
+        webinar = self._get_webinar(context)
+        return super(_WebinarDecorator, self)._predicate(webinar, unused_result) \
+           and has_permission(ACT_READ, webinar, self.request) \
+           and IWebinarClient(webinar, None) is not None
 
     def is_registered(self, webinar):
         # pylint: disable=no-member
         reg_container = IWebinarRegistrationMetadataContainer(webinar)
         return self.remoteUser.username in reg_container
 
+    def _get_webinar(self, context):
+        """
+        This may be extensible by subclasses.
+        """
+        return context
+
     def _do_decorate_external(self, context, result):
         links = result.setdefault(LINKS, [])
-        if self.is_registered(context):
+        webinar = self._get_webinar(context)
+        if self.is_registered(webinar):
             rels = (VIEW_JOIN_WEBINAR, VIEW_WEBINAR_UNREGISTER)
         else:
             rels = (VIEW_WEBINAR_REGISTRATION_FIELDS, VIEW_WEBINAR_REGISTER)
 
         for rel in rels:
-            link = Link(context,
+            link = Link(webinar,
                         rel=rel,
                         elements=('@@%s' % rel,))
             interface.alsoProvides(link, ILocation)
             link.__name__ = ''
-            link.__parent__ = context
+            link.__parent__ = webinar
             links.append(link)
 
         if 'href' not in result:
-            link = Link(context)
+            link = Link(webinar)
             interface.alsoProvides(link, ILinkExternalHrefOnly)
             result['href'] = link
+
+WebinarDecorator = _WebinarDecorator
