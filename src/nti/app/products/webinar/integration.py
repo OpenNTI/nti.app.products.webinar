@@ -108,11 +108,11 @@ class GoToWebinarAuthorizedIntegration(AbstractOAuthAuthorizedIntegration,
         concurrency.
         """
         self._redis_client.setex(self._access_token_key_name,
-                                 value=access_token,
-                                 time=self.access_token_expiry)
+                                 time=self.access_token_expiry,
+                                 value=access_token)
         self._redis_client.setex(self._refresh_token_key_name,
-                                 value=refresh_token,
-                                 time=self.refresh_token_expiry)
+                                 time=self.refresh_token_expiry,
+                                 value=refresh_token)
 
     @property
     def _redis_client(self):
