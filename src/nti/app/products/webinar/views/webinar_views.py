@@ -50,8 +50,7 @@ from nti.dataserver.authorization import ACT_READ
 from nti.dataserver.authorization import ACT_NTI_ADMIN
 from nti.dataserver.authorization import ACT_CONTENT_EDIT
 
-from nti.externalization.externalization import StandardExternalFields
-
+from nti.externalization.interfaces import StandardExternalFields
 from nti.externalization.interfaces import LocatedExternalDict
 
 from nti.site.utils import unregisterUtility
