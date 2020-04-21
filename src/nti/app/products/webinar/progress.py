@@ -91,6 +91,7 @@ def update_webinar_progress(webinar):
         return False
     # Get the progress and store by registrantKey
     progress_collection = client.get_webinar_progress(webinar.webinarKey)
+
     if progress_collection is None:
         logger.info("Cannot get webinar progress (%s) since webinar progress cannot be fetched (deleted?)",
                     webinar)

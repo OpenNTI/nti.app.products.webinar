@@ -18,15 +18,12 @@ from zope.cachedescriptors.property import Lazy
 from nti.app.products.webinar.interfaces import IWebinar
 from nti.app.products.webinar.interfaces import IWebinarClient
 from nti.app.products.webinar.interfaces import IWebinarCollection
+from nti.app.products.webinar.interfaces import WebinarClientError
 from nti.app.products.webinar.interfaces import IUserWebinarProgress
 from nti.app.products.webinar.interfaces import WebinarRegistrationError
 from nti.app.products.webinar.interfaces import IWebinarRegistrationFields
 from nti.app.products.webinar.interfaces import IWebinarRegistrationMetadata
 from nti.app.products.webinar.interfaces import IGoToWebinarAuthorizedIntegration
-
-from nti.app.products.webinar import MessageFactory as _
-
-from nti.app.products.webinar.utils import raise_error
 
 logger = __import__('logging').getLogger(__name__)
 
@@ -95,8 +92,7 @@ class GoToWebinarClient(object):
                         url,
                         response.status_code,
                         response.text)
-            raise_error({'message': _(u"Error during webinar call."),
-                         'code': 'WebinarClientAPIError'})
+            raise WebinarClientError(response.text)
         return response
 
     def get_all_webinars(self, raw=False):

@@ -37,6 +37,7 @@ from nti.app.products.webinar import MessageFactory as _
 from nti.app.products.webinar.interfaces import IWebinar
 from nti.app.products.webinar.interfaces import IWebinarClient
 from nti.app.products.webinar.interfaces import JoinWebinarEvent
+from nti.app.products.webinar.interfaces import WebinarClientError
 from nti.app.products.webinar.interfaces import WebinarRegistrationError
 from nti.app.products.webinar.interfaces import IWebinarAuthorizedIntegration
 from nti.app.products.webinar.interfaces import IGoToWebinarAuthorizedIntegration
@@ -91,7 +92,11 @@ class UpcomingWebinarsView(AbstractAuthenticatedView):
 
     def __call__(self):
         client = IWebinarClient(self.context)
-        webinars = client.get_upcoming_webinars()
+        try:
+            webinars = client.get_upcoming_webinars()
+        except WebinarClientError:
+            raise_error({'message': _(u"Error during webinar call."),
+                         'code': 'WebinarClientAPIError'})
         result = LocatedExternalDict()
         result[ITEMS] = webinars
         result[TOTAL] = result[ITEM_COUNT] = len(webinars)
@@ -159,7 +164,11 @@ class WebinarRegistrationFieldView(AbstractAuthenticatedView):
                          'code': 'UnauthorizedWebinarError'},
                          factory=hexc.HTTPUnprocessableEntity)
 
-        result = client.get_registration_fields(self.context.webinarKey)
+        try:
+            result = client.get_registration_fields(self.context.webinarKey)
+        except WebinarClientError:
+            raise_error({'message': _(u"Error during webinar call."),
+                         'code': 'WebinarClientAPIError'})
         if not result:
             raise_error({'message': _(u"Webinar does not exist."),
                          'code': 'WebinarNotFoundError'},
@@ -204,6 +213,9 @@ class WebinarRegisterView(AbstractAuthenticatedView,
                          'code': 'WebinarRegistrationValidationError',
                          'error_dict': validation_error.json},
                         factory=hexc.HTTPUnprocessableEntity)
+        except WebinarClientError:
+            raise_error({'message': _(u"Validation error during registration."),
+                         'code': 'WebinarRegistrationValidationError'})
         logger.info('Registered user for webinar (%s) (%s) (%s)',
                     self.context.webinarKey,
                     self.remoteUser,
@@ -236,8 +248,12 @@ class WebinarUnRegisterView(AbstractAuthenticatedView):
         username = self.remoteUser.username
         if username in container:
             registration_metadata = container[username]
-            did_unregister = client.unregister_user(self.context.webinarKey,
+            try:
+                did_unregister = client.unregister_user(self.context.webinarKey,
                                                     registration_metadata.registrant_key)
+            except WebinarClientError:
+                raise_error({'message': _(u"Error during unregistration."),
+                             'code': 'WebinarUnRegistrationError'})
             if did_unregister:
                 logger.info('Unregistered user from webinar (%s) (%s)',
                             username,
