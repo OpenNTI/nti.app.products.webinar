@@ -143,7 +143,7 @@ class GoToWebinarAuthorizedIntegration(AbstractOAuthAuthorizedIntegration,
 
     def update_tokens(self, old_access_token=None):
         with self._lock:
-            # Someone may beat us; if so, user their new token
+            # Someone may beat us; if so, use their new token
             current_access_token = self._redis_client.get(self._access_token_key_name)
             if     not current_access_token \
                 or current_access_token == old_access_token:

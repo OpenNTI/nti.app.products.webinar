@@ -71,6 +71,12 @@ def get_token_data(post_data):
                     access_data)
         raise_error({'message': _(u"No webinar refresh token"),
                      'code': 'WebinarAuthMissingRefreshToken'})
+    if not access_data.get('refresh_token'):
+        # Not sure how this could happen
+        logger.warn("Received an empty refresh token? (%s) (%s) (%s)",
+                    post_data, access_data, response.status_code)
+        raise_error({'message': _(u"No webinar refresh token"),
+                     'code': 'WebinarAuthMissingRefreshToken'})
     return access_data
 
 
